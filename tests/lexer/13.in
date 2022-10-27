@@ -1,0 +1,8 @@
+program hello;
+	var a, b, c : integer;
+begin
+	c := a - b + 12 - 12.3 * %01; //some comment
+	{some other
+	comment}
+	b := c / 44.4e4;
+end.

@@ -18,7 +18,7 @@ enum LexemeType {
 
 std::string to_string(LexemeType type);
 
-[[maybe_unused]] const std::vector<std::string> allKeywords = {
+const std::vector<std::string> allKeywords = {
         "string",
         "char",
         "integer",
@@ -65,7 +65,7 @@ std::string to_string(LexemeType type);
         "set",
         "shl",
         "shr",
-        "string",
+        "String",
         "then",
         "to",
         "true",
@@ -145,6 +145,8 @@ public:
     LexemeType GetType();
 
     friend std::ostream &operator<<(std::ostream &os, const Lexeme &lexeme);
+
+    std::string String();
 };
 
 #endif

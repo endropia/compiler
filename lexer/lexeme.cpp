@@ -41,10 +41,22 @@ LexemeType Lexeme::GetType() {
 }
 
 std::ostream &operator<<(std::ostream &os, const Lexeme &lexeme) {
+    if (lexeme.type == LexemeType::eof) {
+        os << lexeme.line << "\t"
+           << lexeme.column << "\t"
+           << to_string(lexeme.type);
+        return os;
+    }
     os << lexeme.line << "\t"
        << lexeme.column << "\t"
        << to_string(lexeme.type) << "\t"
        << lexeme.value << "\t"
        << lexeme.rawLexeme;
     return os;
+}
+
+std::string Lexeme::String() {
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
 }

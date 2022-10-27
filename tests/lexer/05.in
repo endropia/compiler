@@ -1,0 +1,6 @@
+something //some comment
+something {some
+other comment}
+something (* comment
+comment *)
+endofsomethig
