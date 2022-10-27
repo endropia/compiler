@@ -1,0 +1,10 @@
+1	1	Identifier	A	A
+2	1	Identifier	a	a
+3	1	Identifier	a_	a_
+4	1	Identifier	a2	a2
+5	1	Integer	2	2
+5	2	Identifier	a	a
+6	1	Identifier	_a	_a
+7	1	Identifier	____	____
+8	1	Identifier	a_23	a_23
+8	5	eof

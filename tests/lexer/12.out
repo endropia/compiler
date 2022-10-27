@@ -1,0 +1,11 @@
+1	1	Keyword	program	program
+1	9	Identifier	Hello	Hello
+1	14	Separator	Semicolon	;
+2	1	Keyword	begin	begin
+3	3	Keyword	writeln	writeln
+3	11	Separator	Lparenthesis	(
+3	12	String	'Hello world'	'Hello world'
+3	25	Separator	Rparenthesis	)
+4	1	Keyword	end	end
+4	4	Separator	Period	.
+4	5	eof
