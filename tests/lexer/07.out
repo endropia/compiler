@@ -1,2 +1,6 @@
-1	1	String	'some string'	'some string'
-2	1	eof
+1	1	String	This is a pascal string	'This is a pascal string'
+2	1	String		''
+3	1	String	a	'a'
+4	1	String	aBCD	'a'#66#67#68
+5	1	String	A tabulator character: C is easy to embed	'A tabulator character: '#67' is easy to embed'
+(6, 24) Unterminated string

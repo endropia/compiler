@@ -4,7 +4,7 @@
 2	1	Keyword	BEGIN	begin
 3	3	Keyword	WRITELN	writeln
 3	11	Separator	LPARENTHESIS	(
-3	12	String	'Hello world'	'Hello world'
+3	12	String	Hello world	'Hello world'
 3	25	Separator	RPARENTHESIS	)
 4	1	Keyword	END	end
 4	4	Separator	PERIOD	.
