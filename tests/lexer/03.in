@@ -23,6 +23,5 @@ override pascal private protected
 public published read register
 reintroduce safecall softfloat specialize
 stdcall virtual write string
-char integer real
-INTEGER
-INTeger
+String
+STRING

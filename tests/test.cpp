@@ -23,7 +23,7 @@ std::vector<std::string> FilesToVector() {
 }
 
 
-void CompareFiles(const std::vector<std::string>& files) {
+void CompareFiles(const std::vector<std::string> &files) {
     int success = 0, total = 0;
     std::ifstream file_out;
 
@@ -31,10 +31,28 @@ void CompareFiles(const std::vector<std::string>& files) {
         Lexer lexer;
 
         total++;
-        file_out.open(file + ".out");
         std::cout << file << "\n";
+        file_out.open(file + ".out");
         lexer.OpenFile(file + ".in");
         bool test_success = true;
+
+        if (!file_out.good()) {
+            std::ofstream file_out_new;
+            file_out_new.open(file + ".out");
+            try {
+                while (true) {
+                    auto lexeme = lexer.GetLexeme();
+                    file_out_new << lexeme << "\n";
+                    file_out_new.flush();
+                    if (lexeme.GetType() == LexemeType::eof) {
+                        break;
+                    }
+                }
+            } catch (LexerException err) {
+                file_out_new << err.what();
+            }
+            continue;
+        }
 
         while (true) {
             std::string str;
@@ -53,7 +71,7 @@ void CompareFiles(const std::vector<std::string>& files) {
                 if (lexeme.GetType() == LexemeType::eof) {
                     break;
                 }
-            } catch (std::runtime_error err) {
+            } catch (LexerException err) {
                 if (str == err.what()) {
                     std::cout << "OK\t" << err.what() << "\n";
                 } else {
@@ -73,4 +91,8 @@ void CompareFiles(const std::vector<std::string>& files) {
     std::cout << "Failed tests:" << " " << total - success << "\n";
 }
 
+int main() {
+    CompareFiles(FilesToVector());
+    return 0;
+}
 

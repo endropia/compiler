@@ -2,6 +2,9 @@
 #include "lexer.h"
 #include "lexeme.h"
 
+#include <magic_enum.hpp>
+#include <cmath>
+
 Position::Position(int line, int column) {
     this->line = line;
     this->column = column;
@@ -76,116 +79,126 @@ bool Lexer::UnGet() {
 Lexeme Lexer::GetLexeme() {
     char c = Get();
 
-    while (c == ' ' or c == '\t' or c == '\n') {
-        c = Get();
+    while (c == ' ' or c == '\t' or c == '\n' or c == '\r'
+           or c == '{' or c == '(' or c == '/') {
+        if (c == '(') {
+            if (Peek() == '*') {
+                Get();
+                ScanMultilineComment_();
+                c = Get();
+            } else {
+                break;
+            }
+        } else if (c == '{') {
+            ScanMultilineComment();
+            c = Get();
+        } else if (c == '/') {
+            if (Peek() == '/') {
+                Get();
+                ScanSingleLineComment();
+                c = Get();
+            } else {
+                break;
+            }
+        } else {
+            c = Get();
+        }
     }
 
     switch (c) {
-        case EOF: // end of file
+        case EOF:
             return PrepareLexeme(LexemeType::eof, "", "");
         case '=':
-            return PrepareLexeme(LexemeType::Operator, "Equal", "=");
+            return PrepareLexeme(LexemeType::Operator, Operators::EQUAL, "=");
         case '<':
             c = Get();
             if (c == '>') {
-                return PrepareLexeme(LexemeType::Operator, "Unequal", "<>");
+                return PrepareLexeme(LexemeType::Operator, Operators::UNEQUAL, "<>");
             } else if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "LTEOE", "<=");
+                return PrepareLexeme(LexemeType::Operator, Operators::LESSEQUAL, "<=");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "Less", "<");
+                return PrepareLexeme(LexemeType::Operator, Operators::LESS, "<");
             }
         case '>':
             c = Get();
             if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "MOE", ">=");
+                return PrepareLexeme(LexemeType::Operator, Operators::GREATEREQUAL, ">=");
             } else if (c == '<') {
-                return PrepareLexeme(LexemeType::Operator, "SD", "><");
+                return PrepareLexeme(LexemeType::Operator, Operators::SYMDIFF, "><");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "More", ">");
+                return PrepareLexeme(LexemeType::Operator, Operators::GREATER, ">");
             }
         case '+':
             c = Get();
             if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "AE", "+=");
+                return PrepareLexeme(LexemeType::Operator, Operators::ADDASSIGN, "+=");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "Addition", "+");
+                return PrepareLexeme(LexemeType::Operator, Operators::ADD, "+");
             }
         case '-':
             c = Get();
             if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "SE", "-=");
+                return PrepareLexeme(LexemeType::Operator, Operators::SUBSTRACTASSIGN, "-=");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "Subtraction", "-");
+                return PrepareLexeme(LexemeType::Operator, Operators::SUBSTRACT, "-");
             }
         case '*':
             c = Get();
             if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "ME", "*=");
+                return PrepareLexeme(LexemeType::Operator, Operators::MULTIPLYASSIGN, "*=");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "Multiplication", "*");
+                return PrepareLexeme(LexemeType::Operator, Operators::MULTIPLY, "*");
             }
         case '/':
             c = Get();
             if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "DE", "/=");
-            } else if (c == '/') {
-                UnGet();
-                ScanSingleLineComment();
-                return GetLexeme();
+                return PrepareLexeme(LexemeType::Operator, Operators::DIVISIONASSIGN, "/=");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "Division", "/");
+                return PrepareLexeme(LexemeType::Operator, Operators::DIVISION, "/");
             }
         case '.':
             c = Get();
             if (c == '.') {
-                return PrepareLexeme(LexemeType::Separator, "DPeriod", "..");
+                return PrepareLexeme(LexemeType::Separator, Separators::DOUBLEPERIOD, "..");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Separator, "Period", ".");
+                return PrepareLexeme(LexemeType::Separator, Separators::PERIOD, ".");
             }
         case ',':
-            return PrepareLexeme(LexemeType::Separator, "Comma", ",");
+            return PrepareLexeme(LexemeType::Separator, Separators::COMMA, ",");
         case ';':
-            return PrepareLexeme(LexemeType::Separator, "Semicolon", ";");
+            return PrepareLexeme(LexemeType::Separator, Separators::SEMICOLON, ";");
         case ':':
             c = Get();
             if (c == '=') {
-                return PrepareLexeme(LexemeType::Operator, "Assign", ":=");
+                return PrepareLexeme(LexemeType::Operator, Operators::ASSIGN, ":=");
             } else {
                 UnGet();
-                return PrepareLexeme(LexemeType::Operator, "Colon", ":");
+                return PrepareLexeme(LexemeType::Separator, Separators::COLON, ":");
             }
         case '(':
-            c = Peek();
-            if (c == '*') {
-                ScanMultilineComment_();
-                return GetLexeme();
-            } else {
-                return PrepareLexeme(LexemeType::Separator, "Lparenthesis", "(");
-            }
+            return PrepareLexeme(LexemeType::Separator, Separators::LPARENTHESIS, "(");
         case ')':
-            return PrepareLexeme(LexemeType::Separator, "Rparenthesis", ")");
+            return PrepareLexeme(LexemeType::Separator, Separators::RPARENTHESIS, ")");
         case '[':
-            return PrepareLexeme(LexemeType::Separator, "RSbracket", "[");
+            return PrepareLexeme(LexemeType::Separator, Separators::LSBRACKET, "[");
         case ']':
-            return PrepareLexeme(LexemeType::Separator, "LSbracket", "]");
-        case '{':
-            UnGet();
-            ScanMultilineComment();
-            return GetLexeme();
+            return PrepareLexeme(LexemeType::Separator, Separators::RSBRACKET, "]");
         case '@':
-            return PrepareLexeme(LexemeType::Operator, "At", "@");
-        case '#':
-            return PrepareLexeme(LexemeType::Separator, "Lattice ", "#");
+            return PrepareLexeme(LexemeType::Operator, Operators::AT, "@");
         case '^':
-            return PrepareLexeme(LexemeType::Operator, "Circumflex ", "^");
+            return PrepareLexeme(LexemeType::Operator, Operators::CIRCUMFLEX, "^");
         case '\'':
+            UnGet();
+            return ScanString();
+        case '#':
+            UnGet();
             return ScanString();
         case '$':
             c = Peek();
@@ -231,8 +244,7 @@ Lexeme Lexer::GetLexeme() {
     std::string value;
     value.clear();
     value.push_back(c);
-    throw std::runtime_error("Unexpected character");
-    //return {position.GetLine(), position.GetColumn(), LexemeType::Invalid, value, ""};
+    throw LexerException(position, "Unexpected character");
 }
 
 Lexeme Lexer::ScanNumber(int system) {
@@ -255,7 +267,6 @@ Lexeme Lexer::ScanNumber(int system) {
     if (system != 10) {
         lex.push_back(Get());
     }
-
     while (cur_state != finish) {
         if (cur_state == begin) {
             if (system == 10) cur_state = decimal_number;
@@ -322,7 +333,7 @@ Lexeme Lexer::ScanNumber(int system) {
             }
         }
         if (cur_state == decimal_number_with_dot) {
-            lexemeType = Real;
+            lexemeType = Double;
             char c = Get();
             if ('0' <= c && c <= '9') {
                 cur_state = decimal_number_with_dot;
@@ -348,7 +359,7 @@ Lexeme Lexer::ScanNumber(int system) {
             }
         }
         if (cur_state == decimal_number_with_e) {
-            lexemeType = Real;
+            lexemeType = Double;
             char c = Get();
             if ('0' <= c && c <= '9') {
                 cur_state = decimal_number_with_e;
@@ -359,10 +370,31 @@ Lexeme Lexer::ScanNumber(int system) {
             }
         }
     }
-    std::string value = lex;
-    if (lexemeType == LexemeType::Integer) value = ToDecimal(system, lex);
-    return PrepareLexeme(lexemeType, value, lex);
-    //return {position.GetLine(), position.GetColumn(), lexemeType, value, lex};
+//    std::string value = lex;
+    if (system == 10) {
+        if (lexemeType == LexemeType::Double) {
+            try {
+                return PrepareLexeme(lexemeType, std::stod(lex), lex);
+            } catch (...) {
+                return PrepareLexeme(lexemeType, INFINITY, lex);
+            }
+        } else {
+            try {
+                return PrepareLexeme(lexemeType, std::stoi(lex), lex);
+            } catch (...) {
+                throw LexerException(position, "Integer overflow");
+            }
+        }
+    } else {
+        try {
+            return PrepareLexeme(lexemeType, std::stoi(lex.substr(1, lex.size() - 1), nullptr, system), lex);
+        } catch (...) {
+            throw LexerException(position, "Integer overflow");
+        }
+    }
+//    if (lexemeType == LexemeType::Integer) value = ToDecimal(system, lex);
+//    return PrepareLexeme(lexemeType, value, lex);
+//    return {position.GetLine(), position.GetColumn(), lexemeType, value, lex};
 }
 
 
@@ -383,30 +415,32 @@ std::string Lexer::ToDecimal(int system, const std::string &number) {
 }
 
 Lexeme Lexer::ScanIdentifier() {
-    char c = Peek();
     std::string lex;
     while (true) {
-        c = Peek();
+        char c = Peek();
         if ('0' <= c && c <= '9' || 'A' <= c && c <= 'Z'
             || 'a' <= c && c <= 'z' || c == '_')
             c = Get();
         else break;
         lex += c;
     }
-    LexemeType type = Identifier;
-    std::string value = lex;
-    if (SearchKeyword(lex)) {
-        type = Keyword;
-        value = ToLower(value);
+
+    auto keyword = magic_enum::enum_cast<AllKeywords>(ToUpper(lex));
+
+    if (keyword.has_value()) {
+        return PrepareLexeme(LexemeType::Keyword, keyword.value(), lex);
     }
-    return PrepareLexeme(type, value, lex);
-    //return {position.GetLine(), position.GetColumn(), type, value, lex};
+
+    return PrepareLexeme(LexemeType::Identifier, lex, lex);
 }
 
 void Lexer::ScanSingleLineComment() {
-    char c = Peek();
-    while (c != '\n' && c != EOF) {
+    char c;
+    while (true) {
         c = Get();
+        if (c == '\n' || c == EOF) {
+            return;
+        }
     }
 }
 
@@ -415,7 +449,7 @@ void Lexer::ScanMultilineComment_() {
     while (true) {
         c = Get();
         if (c == EOF) {
-            throw std::runtime_error("Unterminated multiline comment");
+            throw LexerException(position, "Unterminated multiline comment");
         }
         if (c == '*') {
             if (Peek() == ')') {
@@ -427,48 +461,130 @@ void Lexer::ScanMultilineComment_() {
 }
 
 void Lexer::ScanMultilineComment() {
-    char c = Peek();
-    while (c != '}') {
-        if (c == EOF) {
-            throw std::runtime_error("Unterminated multiline comment");
-        }
+    char c;
+    while (true) {
         c = Get();
+        if (c == EOF) {
+            throw LexerException(position, "Unterminated multiline comment");
+        }
+        if (c == '}') {
+            return;
+        }
     }
 }
 
-std::string Lexer::ToLower(std::string s) {
+std::string Lexer::ToUpper(std::string s) {
     for (char &i: s) {
-        i = tolower(i);
+        i = toupper(i);
     }
     return s;
 }
 
 bool Lexer::SearchKeyword(const std::string &lex) {
-    for (int i = 0; i <= allKeywords.size(); i++) {
-        if (allKeywords[i] == lex || allKeywords[i] == Lexer::ToLower(lex)) {
-            return true;
-        }
-    }
-    return false;
+    return magic_enum::enum_contains<AllKeywords>(ToUpper(lex));
 }
 
 Lexeme Lexer::ScanString() {
-    char c = Peek();
-    std::string lex;
-    lex.push_back('\'');
-
-    while (c != '\'') {
-        if (c == EOF || c == '\n') {
-            throw std::runtime_error("Unterminated String");
+    enum state {
+        begin,
+        quoted_string,
+        before_hash,
+        hash,
+        unsigned_integer,
+        after_hash,
+        finish
+    };
+    char c;
+    std::string num;
+    std::string raw;
+    std::string value;
+    state cur_state = begin;
+    while (cur_state != finish) {
+        switch (cur_state) {
+            case begin:
+                c = Peek();
+                if (c == '\'') {
+                    c = Get();
+                    cur_state = quoted_string;
+                    raw += c;
+                } else if (c == '#') {
+                    c = Get();
+                    cur_state = hash;
+                    raw += c;
+                }
+                break;
+            case quoted_string:
+                c = Peek();
+                if (c == '\n' or c == EOF) {
+                    cur_state = finish;
+                    throw LexerException(position, "Unterminated string");
+                } else if (c == '\'') {
+                    c = Get();
+                    cur_state = before_hash;
+                    raw += c;
+                } else {
+                    c = Get();
+                    cur_state = quoted_string;
+                    raw += c;
+                    value += c;
+                }
+                break;
+            case before_hash:
+                c = Peek();
+                if (c == '#') {
+                    c = Get();
+                    cur_state = hash;
+                    raw += c;
+                } else {
+                    cur_state = finish;
+                }
+                break;
+            case hash:
+                c = Peek();
+                if ('0' <= c and c <= '9') {
+                    c = Get();
+                    cur_state = unsigned_integer;
+                    raw += c;
+                    num += c;
+                } else {
+                    throw LexerException(position, "Unexpected character");
+                }
+                break;
+            case unsigned_integer:
+                c = Peek();
+                if ('0' <= c and c <= '9') {
+                    c = Get();
+                    raw += c;
+                    num += c;
+                    if (std::stoi(num) < 256) {
+                        cur_state = unsigned_integer;
+                    } else {
+                        throw LexerException(position, "Illegal number after #");
+                    }
+                } else {
+                    cur_state = after_hash;
+                }
+                break;
+            case after_hash:
+                c = Peek();
+                value += (char) stoi(num);
+                num = "";
+                if (c == '\'') {
+                    c = Get();
+                    raw += c;
+                    cur_state = quoted_string;
+                } else if (c == '#') {
+                    cur_state = before_hash;
+                } else {
+                    cur_state = finish;
+                }
+                break;
         }
-        c = Get();
-        lex += c;
     }
-
-    return PrepareLexeme(LexemeType::String, lex, lex);
+    return PrepareLexeme(LexemeType::String, value, raw);
 }
 
-Lexeme Lexer::PrepareLexeme(LexemeType type, const std::string &value, const std::string &raw) {
+Lexeme Lexer::PrepareLexeme(LexemeType type, LexemeValue value, const std::string &raw) {
     if (type == LexemeType::eof) {
         return Lexeme(position.GetLine(), position.GetColumn() - 1, type, value, raw);
     }

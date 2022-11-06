@@ -1,4 +1,5 @@
 #include <iostream>
+#include <variant>
 
 #include "lexer/lexer.h"
 
@@ -7,22 +8,35 @@
 
 std::string path_to_test = "../tests/lexer/02.in";
 
-int main() {
+int main(int argc, char **argv) {
+    if (argc == 1) {
+        std::cout << "give me file plz";
+        return 1;
+    }
+    std::ifstream reader(argv[1]);
 
-//    std::ios_base::sync_with_stdio(false);
-//    Lexer lexer;
-//    try {
-//        for (const auto &item: lexer.Scan(path_to_test)) {
-//            std::cout << item << "\n";
-//        }
-//    } catch (...) {
-//        std::cout << "ERROR";
-//    }
-//
-//    for (auto &item: FilesToVector()) {
-//        std::cout << item << "\n";
-//    }
+    if (!reader.good()) {
+        std::cout << "file doesnt exist";
+    }
 
-    CompareFiles(FilesToVector());
+    reader.close();
+    Lexer lexer;
+    lexer.OpenFile(argv[1]);
+
+    while (true) {
+        try {
+            auto lexeme = lexer.GetLexeme();
+            std::cout << lexeme << "\n";
+            if (lexeme.GetType() == LexemeType::eof) {
+                break;
+            }
+        } catch (LexerException err) {
+            std::cout << err.what();
+            break;
+        }
+    }
+
     return 0;
 }
+
+

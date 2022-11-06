@@ -2,33 +2,11 @@
 #include <utility>
 #include "lexeme.h"
 
-std::string to_string(LexemeType type)
-{
-    switch(type) {
-        case eof:
-            return "eof";
-        case Invalid:
-            return "Invalid";
-        case Identifier:
-            return "Identifier";
-        case Integer:
-            return "Integer";
-        case Real:
-            return "Real";
-        case Keyword:
-            return "Keyword";
-        case Operator:
-            return "Operator";
-        case Separator:
-            return "Separator";
-        case String:
-            return "String";
-    }
-    return "";
-}
+#include <magic_enum.hpp>
+
 
 Lexeme::Lexeme(int line, int column, LexemeType type,
-               const std::string& value, const std::string& rawLexeme) {
+               LexemeValue value, const std::string &rawLexeme) {
     this->line = line;
     this->column = column;
     this->type = type;
@@ -44,14 +22,35 @@ std::ostream &operator<<(std::ostream &os, const Lexeme &lexeme) {
     if (lexeme.type == LexemeType::eof) {
         os << lexeme.line << "\t"
            << lexeme.column << "\t"
-           << to_string(lexeme.type);
+           << magic_enum::enum_name(lexeme.type);
         return os;
     }
     os << lexeme.line << "\t"
        << lexeme.column << "\t"
-       << to_string(lexeme.type) << "\t"
-       << lexeme.value << "\t"
-       << lexeme.rawLexeme;
+       << magic_enum::enum_name(lexeme.type) << "\t";
+
+    switch (lexeme.type) {
+        case Integer:
+            os << std::get<int>(lexeme.value);
+            break;
+        case Double:
+            os << std::get<double>(lexeme.value);
+            break;
+        case String:
+        case Identifier:
+            os << std::get<std::string>(lexeme.value);
+            break;
+        case Keyword:
+            os << magic_enum::enum_name(std::get<AllKeywords>(lexeme.value));
+            break;
+        case Operator:
+            os << magic_enum::enum_name(std::get<Operators>(lexeme.value));
+            break;
+        case Separator:
+            os << magic_enum::enum_name(std::get<Separators>(lexeme.value));
+            break;
+    }
+    os << "\t" << lexeme.rawLexeme;
     return os;
 }
 
