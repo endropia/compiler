@@ -26,4 +26,5 @@ cmake --build .
 Проект содержит 2 таргета:
 
 compiler
+
 compiler_tests
