@@ -8,3 +8,17 @@
 2022
 
 free pascal
+
+#Запуск
+
+Создать и зайти в директорию
+``` 
+mkdir build
+cd build
+```
+
+Собрать проект
+```
+cmake ..
+cmake --build .
+```
