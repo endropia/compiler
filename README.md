@@ -8,3 +8,22 @@
 2022
 
 free pascal
+
+# Запуск
+
+Создать и зайти в директорию
+``` 
+mkdir build
+cd build
+```
+
+Собрать проект
+```
+cmake ..
+cmake --build .
+```
+
+Проект содержит 2 таргета:
+
+- compiler
+- compiler_tests
