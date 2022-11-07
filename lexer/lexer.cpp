@@ -61,7 +61,6 @@ char Lexer::Get() {
     } else {
         position.Set(position.GetLine(), position.GetColumn() + 1);
     }
-    // std::cout << "GET " << position.GetLine() << "\t" << position.GetColumn() << "\n";
     return c;
 }
 
@@ -72,7 +71,6 @@ bool Lexer::UnGet() {
     } else {
         position.Set(position.GetLine(), position.GetColumn() - 1);
     }
-    // std::cout << "UNGET " << position.GetLine() << "\t" << position.GetColumn() << "\n";
     return result;
 }
 
@@ -253,10 +251,11 @@ Lexeme Lexer::ScanNumber(int system) {
         decimal_number,
         dot,
         decimal_number_with_dot,
+        not_decimal_number_with_dot,
         e,
         decimal_number_with_e,
         binary_number,
-        octa_number,
+        octal_number,
         hex_number,
         finish
     };
@@ -271,7 +270,7 @@ Lexeme Lexer::ScanNumber(int system) {
         if (cur_state == begin) {
             if (system == 10) cur_state = decimal_number;
             if (system == 2) cur_state = binary_number;
-            if (system == 8) cur_state = octa_number;
+            if (system == 8) cur_state = octal_number;
             if (system == 16) cur_state = hex_number;
         }
         if (cur_state == decimal_number) {
@@ -295,15 +294,21 @@ Lexeme Lexer::ScanNumber(int system) {
             if ('0' == c || c == '1') {
                 cur_state = binary_number;
                 lex += c;
+            } else if (c == '.') {
+                cur_state = not_decimal_number_with_dot;
+                lex += c;
             } else {
                 UnGet();
                 cur_state = finish;
             }
         }
-        if (cur_state == octa_number) {
+        if (cur_state == octal_number) {
             char c = Get();
             if ('0' <= c && c <= '7') {
-                cur_state = octa_number;
+                cur_state = octal_number;
+                lex += c;
+            } else if (c == '.') {
+                cur_state = not_decimal_number_with_dot;
                 lex += c;
             } else {
                 UnGet();
@@ -315,20 +320,37 @@ Lexeme Lexer::ScanNumber(int system) {
             if ('0' <= c && c <= '9' || 'A' <= c && c <= 'F' || 'a' <= c && c <= 'f') {
                 cur_state = hex_number;
                 lex += c;
+            } else if (c == '.') {
+                cur_state = not_decimal_number_with_dot;
+                lex += c;
             } else {
                 UnGet();
                 cur_state = finish;
             }
         }
         if (cur_state == dot) {
+            lexemeType = Double;
             char c = Peek();
             if ('0' <= c && c <= '9') {
                 cur_state = decimal_number_with_dot;
                 Get();
                 lex += c;
+            } else if (c == 'e' or c == 'E') {
+                cur_state = e;
+                c = Get();
+                lex += c;
             } else {
-                lex.pop_back();
-                UnGet();
+                cur_state = finish;
+            }
+        }
+        if (cur_state == not_decimal_number_with_dot) {
+            lexemeType = Double;
+            char c = Peek();
+            if (c == 'e' or c == 'E') {
+                cur_state = e;
+                c = Get();
+                lex += c;
+            } else {
                 cur_state = finish;
             }
         }
@@ -348,14 +370,17 @@ Lexeme Lexer::ScanNumber(int system) {
         }
         if (cur_state == e) {
             char c = Peek();
+            if (c == '+' || c == '-') {
+                lex += c;
+                Get();
+                c = Peek();
+            }
             if ('0' <= c && c <= '9') {
                 cur_state = decimal_number_with_e;
                 Get();
                 lex += c;
             } else {
-                UnGet();
-                lex.pop_back();
-                cur_state = finish;
+                throw LexerException(position, "Illegal character");
             }
         }
         if (cur_state == decimal_number_with_e) {
@@ -370,7 +395,6 @@ Lexeme Lexer::ScanNumber(int system) {
             }
         }
     }
-//    std::string value = lex;
     if (system == 10) {
         if (lexemeType == LexemeType::Double) {
             try {
@@ -386,15 +410,29 @@ Lexeme Lexer::ScanNumber(int system) {
             }
         }
     } else {
-        try {
-            return PrepareLexeme(lexemeType, std::stoi(lex.substr(1, lex.size() - 1), nullptr, system), lex);
-        } catch (...) {
-            throw LexerException(position, "Integer overflow");
+        if (lexemeType == LexemeType::Double) {
+            auto pos_of_dot = lex.find('.');
+            int integer_part;
+            try {
+                integer_part = std::stoi(lex.substr(1, lex.size() - pos_of_dot), nullptr, system);
+            } catch (...) {
+                throw LexerException(position, "Invalid integer expression");
+            }
+            try {
+                return PrepareLexeme(lexemeType,
+                                     integer_part * std::stod("1" + lex.substr(pos_of_dot + 1, lex.size() - 1)),
+                                     lex);
+            } catch (...) {
+                return PrepareLexeme(lexemeType, INFINITY, lex);
+            }
+        } else {
+            try {
+                return PrepareLexeme(lexemeType, std::stoi(lex.substr(1, lex.size() - 1), nullptr, system), lex);
+            } catch (...) {
+                throw LexerException(position, "Integer overflow");
+            }
         }
     }
-//    if (lexemeType == LexemeType::Integer) value = ToDecimal(system, lex);
-//    return PrepareLexeme(lexemeType, value, lex);
-//    return {position.GetLine(), position.GetColumn(), lexemeType, value, lex};
 }
 
 
