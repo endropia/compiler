@@ -1,32 +1,43 @@
-#include <sstream>
-#include <utility>
 #include "lexeme.h"
+#include <sstream>
 
 #include <magic_enum.hpp>
 
-
-Lexeme::Lexeme(int line, int column, LexemeType type,
-               LexemeValue value, const std::string &rawLexeme) {
+Position::Position(int line, int column) {
     this->line = line;
     this->column = column;
+}
+
+int Position::GetLine() const { return line; }
+
+int Position::GetColumn() const { return column; }
+
+void Position::Set(int line, int column) {
+    this->line = line;
+    this->column = column;
+}
+
+void Position::Set(const Position &pos) {
+    Set(pos.line, pos.column);
+}
+
+Lexeme::Lexeme(const Position &position, LexemeType type, LexemeValue &value,
+               const std::string &rawLexeme)
+        : position(position) {
     this->type = type;
     this->value = value;
     this->rawLexeme = rawLexeme;
 }
 
-LexemeType Lexeme::GetType() {
-    return type;
-}
+LexemeType Lexeme::GetType() { return type; }
 
 std::ostream &operator<<(std::ostream &os, const Lexeme &lexeme) {
     if (lexeme.type == LexemeType::eof) {
-        os << lexeme.line << "\t"
-           << lexeme.column << "\t"
-           << magic_enum::enum_name(lexeme.type);
+        os << lexeme.position.GetLine() << "\t" << lexeme.position.GetColumn()
+           << "\t" << magic_enum::enum_name(lexeme.type);
         return os;
     }
-    os << lexeme.line << "\t"
-       << lexeme.column << "\t"
+    os << lexeme.position.GetLine() << "\t" << lexeme.position.GetColumn() << "\t"
        << magic_enum::enum_name(lexeme.type) << "\t";
 
     switch (lexeme.type) {

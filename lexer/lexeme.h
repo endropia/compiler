@@ -2,8 +2,8 @@
 #define COMPILER_LEXEME_HEADER
 
 #include <string>
-#include <vector>
 #include <variant>
+#include <vector>
 
 enum LexemeType {
     eof,
@@ -15,7 +15,6 @@ enum LexemeType {
     Separator,
     String
 };
-
 
 enum AllKeywords {
     AND,
@@ -34,7 +33,7 @@ enum AllKeywords {
     ELSE,
     END,
     FALSE,
-    //FILE,
+    // FILE,
     FOR,
     FUNCTION,
     GOTO,
@@ -160,23 +159,48 @@ enum Separators {
     LSBRACKET
 };
 
-typedef std::variant<int, double, std::string, AllKeywords, Operators, Separators> LexemeValue;
+typedef std::variant<int, double, std::string, AllKeywords, Operators,
+        Separators>
+        LexemeValue;
 
-class Lexeme {
+class Position {
     int line;
     int column;
+
+public:
+    Position(int line, int column);
+
+    [[nodiscard]] int GetLine() const;
+
+    [[nodiscard]] int GetColumn() const;
+
+    void Set(int line, int column);
+
+    void Set(const Position &pos);
+};
+
+class Lexeme {
+    Position position;
     LexemeType type;
     LexemeValue value;
     std::string rawLexeme;
+
 public:
-    Lexeme(int line, int column, LexemeType type,
-           LexemeValue value, const std::string &rawLexeme);
+    Lexeme(const Position &position, LexemeType type, LexemeValue &value,
+           const std::string &rawLexeme);
 
     LexemeType GetType();
 
     friend std::ostream &operator<<(std::ostream &os, const Lexeme &lexeme);
 
     std::string String();
+
+    template<typename T>
+    T GetValue() { return std::get<T>(value); }
+
+    Position GetPos() { return position; }
+
+    std::string GetRaw() { return rawLexeme; }
 };
 
 #endif

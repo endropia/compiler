@@ -6,23 +6,11 @@
 
 #include "lexeme.h"
 
-class Position {
-    int line;
-    int column;
-
-public:
-    Position(int line, int column);
-
-    int GetLine() const;
-
-    int GetColumn() const;
-
-    void Set(int line, int column);
-};
 
 class Lexer {
-    std::ifstream file;
+    std::ifstream &file;
     Position position = {1, 1};
+    Position begin_position = {1, 1};
     int column_after_new_line = 1;
 
     char Get();
@@ -31,22 +19,16 @@ class Lexer {
 
     char Peek();
 
-    static std::string ToDecimal(int system, const std::string &number);
-
-    static bool SearchKeyword(const std::string &lex);
-
     static std::string ToUpper(std::string);
+
+    void SaveBeginPosition();
 
     Lexeme PrepareLexeme(LexemeType type, LexemeValue value, const std::string &raw);
 
 public:
-    Lexer();
+    Lexer(std::ifstream &file);
 
     ~Lexer();
-
-    std::vector<Lexeme> Scan(std::string filename);
-
-    void OpenFile(const std::string &filename);
 
     Lexeme GetLexeme();
 
@@ -66,8 +48,8 @@ public:
 class LexerException : public std::exception {
     std::string message;
 public:
-    [[nodiscard]] char *what() const noexcept override {
-        return const_cast<char *>(message.c_str());
+    [[nodiscard]] const char *what() const noexcept override {
+        return message.c_str();
     }
 
     LexerException(Position pos, const std::string &message) : std::exception() {

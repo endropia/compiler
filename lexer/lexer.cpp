@@ -5,48 +5,14 @@
 #include <magic_enum.hpp>
 #include <cmath>
 
-Position::Position(int line, int column) {
-    this->line = line;
-    this->column = column;
-}
-
-int Position::GetLine() const { return line; }
-
-int Position::GetColumn() const { return column; }
-
-void Position::Set(int line, int column) {
-    this->line = line;
-    this->column = column;
-}
-
-Lexer::Lexer() {
-
+Lexer::Lexer(std::ifstream &file) : file(file) {
+    position = {1, 1};
 }
 
 Lexer::~Lexer() {
     if (file.is_open() || file.eof()) {
         file.close();
     }
-}
-
-void Lexer::OpenFile(const std::string &filename) {
-    file.open(filename);
-    position = {1, 1};
-}
-
-std::vector<Lexeme> Lexer::Scan(std::string filename) {
-    position.Set(1, 1);
-    std::vector<Lexeme> lexemes;
-    file.open(filename);
-
-    auto lexeme = GetLexeme();
-    lexemes.push_back(lexeme);
-    while (lexeme.GetType() != LexemeType::eof) {
-        lexeme = GetLexeme();
-        lexemes.push_back(lexeme);
-    }
-    file.close();
-    return lexemes;
 }
 
 char Lexer::Peek() {
@@ -75,6 +41,7 @@ bool Lexer::UnGet() {
 }
 
 Lexeme Lexer::GetLexeme() {
+    SaveBeginPosition();
     char c = Get();
 
     while (c == ' ' or c == '\t' or c == '\n' or c == '\r'
@@ -83,6 +50,7 @@ Lexeme Lexer::GetLexeme() {
             if (Peek() == '*') {
                 Get();
                 ScanMultilineComment_();
+                SaveBeginPosition();
                 c = Get();
             } else {
                 break;
@@ -94,11 +62,13 @@ Lexeme Lexer::GetLexeme() {
             if (Peek() == '/') {
                 Get();
                 ScanSingleLineComment();
+                SaveBeginPosition();
                 c = Get();
             } else {
                 break;
             }
         } else {
+            SaveBeginPosition();
             c = Get();
         }
     }
@@ -436,22 +406,6 @@ Lexeme Lexer::ScanNumber(int system) {
 }
 
 
-std::string Lexer::ToDecimal(int system, const std::string &number) {
-    long long int decimal = 0;
-    int num;
-    for (int i = (system != 10); i < number.size(); ++i) {
-        if ('a' <= tolower(number[i]) && tolower(number[i]) <= 'f') {
-            num = tolower(number[i]) - 'a' + 10;
-        } else {
-            num = number[i] - '0';
-        }
-        decimal = decimal * system + num;
-        if (decimal > 2147483647)
-            throw std::runtime_error("Overflow integer");
-    }
-    return std::to_string(decimal);
-}
-
 Lexeme Lexer::ScanIdentifier() {
     std::string lex;
     while (true) {
@@ -516,10 +470,6 @@ std::string Lexer::ToUpper(std::string s) {
         i = toupper(i);
     }
     return s;
-}
-
-bool Lexer::SearchKeyword(const std::string &lex) {
-    return magic_enum::enum_contains<AllKeywords>(ToUpper(lex));
 }
 
 Lexeme Lexer::ScanString() {
@@ -624,11 +574,11 @@ Lexeme Lexer::ScanString() {
 
 Lexeme Lexer::PrepareLexeme(LexemeType type, LexemeValue value, const std::string &raw) {
     if (type == LexemeType::eof) {
-        return Lexeme(position.GetLine(), position.GetColumn() - 1, type, value, raw);
+        return Lexeme(begin_position, type, value, raw);
     }
-    return Lexeme(position.GetLine(), position.GetColumn() - raw.size(), type, value, raw);
+    return Lexeme(begin_position, type, value, raw);
 }
 
-
-
-
+void Lexer::SaveBeginPosition() {
+    begin_position.Set(position);
+}

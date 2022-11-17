@@ -1,0 +1,20 @@
+1	1	Integer	123	123
+2	1	Double	123.123	123.123
+3	1	Double	1.23123e+125	123.123e123
+4	1	Double	1.23e+125	123e+123
+5	1	Double	1.23e-121	123e-123
+6	1	Double	1.23123e+125	123.123e+123
+7	1	Double	1.23123e-121	123.123e-123
+8	1	Double	123	123.
+9	1	Double	10	1.e1
+10	1	Integer	10	$a
+11	1	Double	10	$a.
+12	1	Double	1000	$a.e2
+13	1	Double	1000	$a.e+2
+14	1	Double	0.1	$a.e-2
+15	1	Integer	7	&7
+16	1	Double	7	&7.
+17	1	Double	70	&7.e1
+18	1	Double	10	$a.
+18	4	Double	10	1e1
+18	7	eof

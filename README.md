@@ -1,4 +1,5 @@
 # compiler
+
 Бахирева Елизавета Александровна
 
 ДВФУ
@@ -12,12 +13,14 @@ free pascal
 # Запуск
 
 Создать и зайти в директорию
+
 ``` 
 mkdir build
 cd build
 ```
 
 Собрать проект
+
 ```
 cmake ..
 cmake --build .
@@ -27,3 +30,14 @@ cmake --build .
 
 - compiler
 - compiler_tests
+
+# Использование
+
+```
+compiler [args]
+```
+
+Аргументы:
+
+- ``-l`` run lexer
+- ``-p`` run parser
