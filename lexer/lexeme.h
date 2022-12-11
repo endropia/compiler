@@ -201,6 +201,14 @@ public:
     Position GetPos() { return position; }
 
     std::string GetRaw() { return rawLexeme; }
+
+    friend bool operator==(Lexeme &lex, LexemeType type);
+
+    friend bool operator==(Lexeme &lex, Operators op);
+
+    friend bool operator==(Lexeme &lex, Separators sep);
+
+    friend bool operator==(Lexeme &lex, AllKeywords keyword);
 };
 
 #endif

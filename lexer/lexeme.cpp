@@ -70,3 +70,22 @@ std::string Lexeme::String() {
     ss << *this;
     return ss.str();
 }
+
+bool operator==(Lexeme &lex, LexemeType type) {
+    return lex.GetType() == type;
+}
+
+bool operator==(Lexeme &lex, Operators op) {
+    if (lex.type != LexemeType::Operator) return false;
+    return lex.GetValue<Operators>() == op;
+}
+
+bool operator==(Lexeme &lex, Separators sep) {
+    if (lex.type != LexemeType::Separator) return false;
+    return lex.GetValue<Separators>() == sep;
+}
+
+bool operator==(Lexeme &lex, AllKeywords keyword) {
+    if (lex.type != LexemeType::Keyword) return false;
+    return lex.GetValue<AllKeywords>() == keyword;
+}

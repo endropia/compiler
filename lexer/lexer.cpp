@@ -309,7 +309,7 @@ Lexeme Lexer::ScanNumber(int system) {
                 cur_state = e;
                 c = Get();
                 lex += c;
-            } else {
+            } else { // here bug
                 cur_state = finish;
             }
         }

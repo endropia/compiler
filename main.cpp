@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
         Lexer lexer(stream);
         Parser parser(lexer);
 
-        auto head = parser.Expression();
+        auto head = parser.CompoundStatement();
         head->DrawTree(std::cout, 1);
     }
 
