@@ -7,6 +7,165 @@ void DrawIndent(std::ostream &os, int depth) {
     }
 }
 
+template<typename T>
+void copy_elements(std::vector<Node *> &vec, const std::vector<T> &other_vec) {
+    for (auto &item: other_vec) {
+        vec.push_back(item);
+    }
+}
+
+Node *Parser::Program() {
+    Node *name = nullptr;
+    if (lexeme == AllKeywords::PROGRAM) {
+        lexeme = lexer.GetLexeme();
+        if (lexeme != LexemeType::Identifier) {
+            throw ParserException(lexeme.GetPos(), "Identifier expected");
+        }
+        name = new NodeVar(lexeme);
+        lexeme = lexer.GetLexeme();
+        if (lexeme != Separators::SEMICOLON) {
+            throw ParserException(lexeme.GetPos(), "';' expected");
+        }
+        lexeme = lexer.GetLexeme();
+    }
+    auto block = Block(true);
+    if (lexeme != Separators::PERIOD) {
+        throw ParserException(lexeme.GetPos(), "'.' expected");
+    }
+    return new NodeProgram(name, block);
+};
+
+Node *Parser::Block(bool parse_functions) {
+    std::vector<Node *> decls;
+    while (true) {
+        if (lexeme == AllKeywords::CONST) {
+            lexeme = lexer.GetLexeme();
+            copy_elements(decls, ConstDeclPart());
+        } else if (lexeme == AllKeywords::VAR) {
+            lexeme = lexer.GetLexeme();
+            copy_elements(decls, VarDeclPart());
+        } else if (lexeme == AllKeywords::TYPE) {
+            lexeme = lexer.GetLexeme();
+            copy_elements(decls, TypeDeclPart());
+        } else if (lexeme == AllKeywords::FUNCTION) {
+            lexeme = lexer.GetLexeme();
+            decls.push_back(Function());
+        } else if (lexeme == AllKeywords::PROCEDURE) {
+            lexeme = lexer.GetLexeme();
+            decls.push_back(Procedure());
+        } else {
+            break;
+        }
+    }
+
+    if (lexeme != AllKeywords::BEGIN) {
+        throw ParserException(lexeme.GetPos(), "'begin' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    auto stmts = CompoundStatement();
+    return new NodeBlock(decls, stmts);
+}
+
+Node *Parser::Procedure() {
+    if (lexeme != LexemeType::Identifier) {
+        // throw
+    }
+    auto id = new NodeVar(lexeme);
+    lexeme = lexer.GetLexeme();
+    if (lexeme != Separators::LPARENTHESIS) {
+        // throw
+    }
+    lexeme = lexer.GetLexeme();
+    auto params = FunctionParams(false);
+    if (lexeme != Separators::RPARENTHESIS) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    auto block = Block(false);
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    return new NodeProcDecl(id, params, block);
+}
+
+Node *Parser::Function() {
+    if (lexeme != LexemeType::Identifier) {
+        // throw
+    }
+    auto id = new NodeVar(lexeme);
+    lexeme = lexer.GetLexeme();
+    if (lexeme != Separators::LPARENTHESIS) {
+        // throw
+    }
+    lexeme = lexer.GetLexeme();
+    auto params = FunctionParams(false);
+    if (lexeme != Separators::RPARENTHESIS) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    if (lexeme != Separators::COLON) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    auto type = Type();
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    auto block = Block(false);
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "Expected )");
+    }
+    lexeme = lexer.GetLexeme();
+    return new NodeFuncDecl(id, params, block, type);
+}
+
+std::vector<Node *> Parser::FunctionParams(bool required) {
+    std::vector<Node *> result;
+    if (required or (lexeme != Separators::RPARENTHESIS)) {
+        result.push_back(FunctionParam());
+        while (lexeme == Separators::SEMICOLON) {
+            lexeme = lexer.GetLexeme();
+            result.push_back(FunctionParam());
+        }
+    }
+    if (required and result.empty()) {
+        throw ParserException(lexeme.GetPos(), "Expected index");
+    }
+    return result;
+}
+
+Node *Parser::FunctionParam() {
+    NodeKeyword *mod = nullptr;
+    if (lexeme == AllKeywords::CONST or lexeme == AllKeywords::VAR) {
+        mod = new NodeKeyword(lexeme);
+        lexeme = lexer.GetLexeme();
+    }
+    std::vector<NodeVar *> vars;
+    if (lexeme != LexemeType::Identifier) {
+        // throw
+    }
+    vars.push_back(new NodeVar(lexeme));
+    lexeme = lexer.GetLexeme();
+    while (lexeme == Separators::COMMA) {
+        if (lexeme != LexemeType::Identifier) {
+            // throw
+        }
+        vars.push_back(new NodeVar(lexeme));
+        lexeme = lexer.GetLexeme();
+    }
+    if (lexeme != Separators::COLON) {
+        // throw
+    }
+    lexeme = lexer.GetLexeme();
+    return new NodeParam(mod, vars, Type());
+}
+
 Node *Parser::Expression() {
     auto left = SimpleExpression();
     auto lex = lexeme;
@@ -87,14 +246,14 @@ Node *Parser::Factor() {
                 lexeme = lexer.GetLexeme();
                 auto params = ListExpressions(false);
                 if (lexeme != Separators::RPARENTHESIS) {
-                    throw (lexeme.GetPos(), "Expected )");
+                    throw ParserException(lexeme.GetPos(), "Expected )");
                 }
                 res = new NodeCallAccess(res, params);
             } else if (lexeme == Separators::LSBRACKET) {
                 lexeme = lexer.GetLexeme();
                 auto params = ListExpressions(true);
                 if (lexeme != Separators::RSBRACKET) {
-                    throw (lexeme.GetPos(), "Expected ]");
+                    throw ParserException(lexeme.GetPos(), "Expected ]");
                 }
                 res = new NodeArrayAccess(res, params);
             } else {
@@ -103,10 +262,11 @@ Node *Parser::Factor() {
         }
         return res;
     }
+
     if (lex == Separators::LPARENTHESIS) {
         lexeme = lexer.GetLexeme();
         auto exp = Expression();
-        if (lexeme == Separators::RPARENTHESIS)
+        if (lexeme != Separators::RPARENTHESIS)
             throw ParserException(lexeme.GetPos(), "Expected )");
         lexeme = lexer.GetLexeme();
         return exp;
@@ -232,7 +392,6 @@ std::vector<Node *> Parser::Fields() {
 
 Node *Parser::RecordType() {
     lexeme = lexer.GetLexeme();
-    //std::vector<Node *> fields;
     auto fields = Fields();
     return new NodeRecordType(fields);
 }
@@ -256,7 +415,6 @@ NodeStatement *Parser::SimpleStatement() {
 }
 
 NodeStatement *Parser::CompoundStatement() {
-    lexeme = lexer.GetLexeme(); //удолить
     std::vector<NodeStatement *> statements;
     while (true) {
         bool a = false;
@@ -278,7 +436,7 @@ NodeStatement *Parser::CompoundStatement() {
 
 NodeStatement *Parser::Statement() {
     if (lexeme == AllKeywords::BEGIN) {
-        // тут надо будет брать
+        lexeme = lexer.GetLexeme();
         return CompoundStatement();
     }
     if (lexeme == AllKeywords::IF) {
@@ -349,6 +507,109 @@ NodeStatement *Parser::ForStatement() {
 
 }
 
+std::vector<NodeTypeDecl *> Parser::TypeDeclPart() {
+    std::vector<NodeTypeDecl *> type_declarations;
+    type_declarations.push_back(TypeDecl());
+    while (lexeme == LexemeType::Identifier) {
+        type_declarations.push_back(TypeDecl());
+    }
+    return type_declarations;
+}
+
+NodeTypeDecl *Parser::TypeDecl() {
+    if (lexeme != LexemeType::Identifier) {
+        throw ParserException(lexeme.GetPos(), "Identifier expected");
+    }
+    auto id = new NodeVar(lexeme);
+    lexeme = lexer.GetLexeme();
+    if (lexeme != Operators::EQUAL) {
+        throw ParserException(lexeme.GetPos(), "'=' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    auto type = Type();
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "';' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    return new NodeTypeDecl(id, type);
+}
+
+NodeConstDecl *Parser::ConstDecl() {
+    if (lexeme != LexemeType::Identifier) {
+        throw ParserException(lexeme.GetPos(), "Identifier expected");
+    }
+    auto var = new NodeVar(lexeme);
+    lexeme = lexer.GetLexeme();
+    Node *type = nullptr;
+    if (lexeme == Separators::COLON) {
+        lexeme = lexer.GetLexeme();
+        type = Type();
+    }
+    if (lexeme != Operators::EQUAL) {
+        throw ParserException(lexeme.GetPos(), "'=' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    auto exp = Expression();
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "';' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    return new NodeConstDecl(var, type, exp);
+}
+
+std::vector<NodeConstDecl *> Parser::ConstDeclPart() {
+    std::vector<NodeConstDecl *> const_declarations;
+    const_declarations.push_back(ConstDecl());
+    while (lexeme == LexemeType::Identifier) {
+        const_declarations.push_back(ConstDecl());
+    }
+    return const_declarations;
+}
+
+NodeVarDecl *Parser::VarDecl() {
+    std::vector<NodeVar *> vars;
+    while (true) {
+        if (lexeme != LexemeType::Identifier) {
+            throw ParserException(lexeme.GetPos(), "Identifier expected");
+        }
+        vars.push_back(new NodeVar(lexeme));
+        lexeme = lexer.GetLexeme();
+        if (lexeme == Separators::COMMA) {
+            lexeme = lexer.GetLexeme();
+        } else {
+            break;
+        }
+    }
+    if (lexeme != Separators::COLON) {
+        throw ParserException(lexeme.GetPos(), "':' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    auto type = Type();
+    Node *exp = nullptr;
+    if (lexeme == Operators::EQUAL) {
+        if (vars.size() == 1) {
+            lexeme = lexer.GetLexeme();
+            exp = Expression();
+        } else {
+            throw ParserException(lexeme.GetPos(), "'=' expected");
+        }
+    }
+    if (lexeme != Separators::SEMICOLON) {
+        throw ParserException(lexeme.GetPos(), "';' expected");
+    }
+    lexeme = lexer.GetLexeme();
+    return new NodeVarDecl(vars, type, exp);
+}
+
+std::vector<NodeVarDecl *> Parser::VarDeclPart() {
+    std::vector<NodeVarDecl *> var_declarations;
+    var_declarations.push_back(VarDecl());
+    while (lexeme == LexemeType::Identifier) {
+        var_declarations.push_back(VarDecl());
+    }
+    return var_declarations;
+}
+
 
 void NodeBinaryOperation::DrawTree(std::ostream &os, int depth) {
     os << lexeme.GetRaw() << "\n";
@@ -382,10 +643,10 @@ void NodeRecordAccess::DrawTree(std::ostream &os, int depth) {
 
 void NodeCallAccess::DrawTree(std::ostream &os, int depth) {
     os << "call" << "\n";
-    DrawIndent(os, depth);
+    DrawIndent(os, depth + 1);
     rec->DrawTree(os, depth + 1);
     for (int i = 0; i < params.size(); i++) {
-        DrawIndent(os, depth + 1);
+        DrawIndent(os, depth + 2);
         params[i]->DrawTree(os, depth + 2);
     }
 }
@@ -401,8 +662,7 @@ void NodeArrayAccess::DrawTree(std::ostream &os, int depth) {
 }
 
 void NodeSimpleType::DrawTree(std::ostream &os, int depth) {
-    os << "type" << "\n";
-    DrawIndent(os, depth);
+    os << "type: ";
     type->DrawTree(os, depth + 1);
 }
 
@@ -442,9 +702,10 @@ void NodeRecordType::DrawTree(std::ostream &os, int depth) {
 }
 
 void NodeCompoundStatement::DrawTree(std::ostream &os, int depth) {
+    os << "stmts:\n";
     for (auto &statement: statements) {
-        DrawIndent(os, depth);
-        statement->DrawTree(os, depth);
+        DrawIndent(os, depth + 1);
+        statement->DrawTree(os, depth + 1);
     }
 }
 
@@ -484,35 +745,97 @@ void NodeForStatement::DrawTree(std::ostream &os, int depth) {
 }
 
 void NodeBlock::DrawTree(std::ostream &os, int depth) {
-    
-
+    for (auto &decl: decls) {
+        DrawIndent(os, depth);
+        decl->DrawTree(os, depth);
+    }
+    DrawIndent(os, depth);
+    comp_stmt->DrawTree(os, depth);
 }
 
 void NodeProgram::DrawTree(std::ostream &os, int depth) {
-
+    os << "program : ";
+    if (name != nullptr) {
+        name->DrawTree(os, depth);
+    } else {
+        os << "Unnamed program\n";
+    }
+    block->DrawTree(os, depth);
 }
 
 void NodeTypeDecl::DrawTree(std::ostream &os, int depth) {
-
+    os << "alias\n";
+    DrawIndent(os, depth + 1);
+    type->DrawTree(os, depth + 1);
+    DrawIndent(os, depth + 1);
+    var->DrawTree(os, depth + 1);
 }
 
 void NodeVarDecl::DrawTree(std::ostream &os, int depth) {
+    os << "var: \n";
+    for (auto &var: vars) {
+        DrawIndent(os, depth + 1);
+        var->DrawTree(os, depth + 1);
+    }
+    DrawIndent(os, depth + 1);
+    type->DrawTree(os, depth + 1);
+    if (exp) {
+        DrawIndent(os, depth + 1);
+        exp->DrawTree(os, depth + 1);
+    }
 
 }
 
 void NodeConstDecl::DrawTree(std::ostream &os, int depth) {
-
+    os << "const:\n";
+    DrawIndent(os, depth + 1);
+    vars->DrawTree(os, depth + 1);
+    if (type) {
+        DrawIndent(os, depth + 1);
+        type->DrawTree(os, depth + 1);
+    }
+    DrawIndent(os, depth + 1);
+    exp->DrawTree(os, depth + 1);
 }
 
 void NodeParam::DrawTree(std::ostream &os, int depth) {
+    type->DrawTree(os, depth + 1);
+    if (modifier) {
+        DrawIndent(os, depth + 1);
+        modifier->DrawTree(os, depth + 1);
+    }
 
+    for (auto &var: vars) {
+        DrawIndent(os, depth + 1);
+        var->DrawTree(os, depth + 1);
+    }
 }
 
 void NodeProcDecl::DrawTree(std::ostream &os, int depth) {
-
+    os << "procedure:\n";
+    DrawIndent(os, depth + 1);
+    var->DrawTree(os, depth + 1);
+    DrawIndent(os, depth + 1);
+    os << "parameters: \n";
+    for (auto &param: params) {
+        DrawIndent(os, depth + 2);
+        param->DrawTree(os, depth + 2);
+    }
+    block->DrawTree(os, depth + 1);
 }
 
 void NodeFuncDecl::DrawTree(std::ostream &os, int depth) {
-    NodeProcDecl::DrawTree(os, depth);
-    // print type
+    os << "function:\n";
+    DrawIndent(os, depth + 1);
+    var->DrawTree(os, depth + 1);
+    DrawIndent(os, depth + 1);
+    type->DrawTree(os, depth + 1);
+    DrawIndent(os, depth + 1);
+    os << "parameters: \n";
+    for (auto &param: params) {
+        DrawIndent(os, depth + 2);
+        param->DrawTree(os, depth + 2);
+    }
+    block->DrawTree(os, depth + 1);
+
 }

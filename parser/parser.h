@@ -257,24 +257,23 @@ class NodeDecl : public Node {
 };
 
 class NodeBlock : public Node {
-    std::vector<NodeDecl *> decls;
-    std::vector<NodeStatement *> stmts;
+    std::vector<Node *> decls;
+    NodeStatement *comp_stmt;
 public:
-    explicit NodeBlock(std::vector<NodeDecl *> decls,
-                       std::vector<NodeStatement *> stmts) : Node() {
+    explicit NodeBlock(std::vector<Node *> decls,
+                       NodeStatement *comp_stmt) : Node() {
         this->decls = decls;
-        this->stmts = stmts;
+        this->comp_stmt = comp_stmt;
     }
 
     void DrawTree(std::ostream &os, int depth) override;
-
 };
 
 class NodeProgram : public Node {
-    NodeVar *name;
-    NodeBlock *block;
+    Node *name;
+    Node *block;
 public:
-    explicit NodeProgram(NodeVar *name, NodeBlock *block) : Node() {
+    explicit NodeProgram(Node *name, Node *block) : Node() {
         this->name = name;
         this->block = block;
     }
@@ -284,9 +283,9 @@ public:
 
 class NodeTypeDecl : public NodeDecl {
     NodeVar *var;
-    NodeType *type;
+    Node *type;
 public:
-    explicit NodeTypeDecl(NodeVar *name, NodeBlock *block) : NodeDecl() {
+    explicit NodeTypeDecl(NodeVar *var, Node *type) : NodeDecl() {
         this->var = var;
         this->type = type;
     }
@@ -296,11 +295,11 @@ public:
 
 class NodeVarDecl : public NodeDecl {
     std::vector<NodeVar *> vars;
-    NodeType *type;
+    Node *type;
     Node *exp; // may be nullptr;
 public:
     explicit NodeVarDecl(std::vector<NodeVar *> vars,
-                         NodeType *type, Node *exp) : NodeDecl() {
+                         Node *type, Node *exp) : NodeDecl() {
         this->vars = vars;
         this->type = type;
         this->exp = exp;
@@ -311,10 +310,10 @@ public:
 
 class NodeConstDecl : public NodeDecl {
     NodeVar *vars;
-    NodeType *type; // may be nullptr;
+    Node *type; // may be nullptr;
     Node *exp;
 public:
-    explicit NodeConstDecl(NodeVar *vars, NodeType *type, Node *exp) : NodeDecl() {
+    explicit NodeConstDecl(NodeVar *vars, Node *type, Node *exp) : NodeDecl() {
         this->vars = vars;
         this->type = type;
         this->exp = exp;
@@ -327,10 +326,10 @@ public:
 class NodeParam : public Node {
     NodeKeyword *modifier; // "var" or "const"
     std::vector<NodeVar *> vars;
-    NodeType *type;
+    Node *type;
 public:
     explicit NodeParam(NodeKeyword *modifier,
-                       std::vector<NodeVar *> vars, NodeType *type) : Node() {
+                       std::vector<NodeVar *> vars, Node *type) : Node() {
         this->modifier = modifier;
         this->vars = vars;
         this->type = type;
@@ -340,12 +339,13 @@ public:
 };
 
 class NodeProcDecl : public NodeDecl {
-    NodeVar *var;
-    std::vector<NodeParam *> params;
-    NodeBlock *block;
+protected:
+    Node *var;
+    std::vector<Node *> params;
+    Node *block;
 public:
-    explicit NodeProcDecl(NodeVar *var, std::vector<NodeParam *> params,
-                          NodeBlock *block) : NodeDecl() {
+    explicit NodeProcDecl(Node *var, std::vector<Node *> params,
+                          Node *block) : NodeDecl() {
         this->var = var;
         this->params = params;
         this->block = block;
@@ -355,10 +355,10 @@ public:
 };
 
 class NodeFuncDecl : public NodeProcDecl {
-    NodeType *type;
+    Node *type;
 public:
-    explicit NodeFuncDecl(NodeVar *var, std::vector<NodeParam *> params,
-                          NodeBlock *block, NodeType *type) : NodeProcDecl(var, params, block) {
+    explicit NodeFuncDecl(Node *var, std::vector<Node *> params,
+                          Node *block, Node *type) : NodeProcDecl(var, params, block) {
         this->type = type;
     }
 
@@ -373,6 +373,18 @@ class Parser {
 public:
     explicit Parser(Lexer &lexer) : lexer(lexer), lexeme(this->lexer.GetLexeme()) {
     }
+
+    Node *Program();
+
+    Node *Procedure();
+
+    Node *Function();
+
+    Node *FunctionParam();
+
+    std::vector<Node *> FunctionParams(bool required);
+
+    Node *Block(bool parse_functions);
 
     Node *Expression();
 
@@ -413,6 +425,19 @@ public:
     std::vector<Node *> ListExpressions(bool required);
 
     std::vector<Node *> Fields();
+
+    std::vector<NodeTypeDecl *> TypeDeclPart();
+
+    NodeTypeDecl *TypeDecl();
+
+    std::vector<NodeConstDecl *> ConstDeclPart();
+
+    NodeConstDecl *ConstDecl();
+
+    NodeVarDecl *VarDecl();
+
+    std::vector<NodeVarDecl *> VarDeclPart();
+
 
 };
 
