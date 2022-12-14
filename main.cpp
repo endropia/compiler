@@ -1,18 +1,9 @@
 #include <iostream>
-#include <string.h>
 
 #include "lexer/lexer.h"
 #include "parser/parser.h"
-#include "tests/test.h"
+#include "args.h"
 
-bool check_arg(int argc, char **argv, const std::string &arg) {
-    for (auto i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], arg.c_str()) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
 
 int main(int argc, char **argv) {
     if (argc == 1) {
@@ -53,7 +44,10 @@ int main(int argc, char **argv) {
         Lexer lexer(stream);
         Parser parser(lexer);
 
-        auto head = parser.CompoundStatement();
+        auto head = parser.Program();
+//        for (auto i: head) {
+//            i->DrawTree(std::cout, 1);
+//        }
         head->DrawTree(std::cout, 1);
     }
 
