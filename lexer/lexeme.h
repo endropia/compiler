@@ -123,7 +123,6 @@ enum AllKeywords {
     STDCALL,
     VIRTUAL,
     WRITE,
-    WRITELN
 };
 
 enum Operators {
