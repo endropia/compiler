@@ -144,24 +144,24 @@ bool ParserTester::RunTest(const std::string &file) {
     auto out_file_content = ReadFile(file + ".out");
     try {
         std::stringstream parser_answer;
-        parser.Expression()->DrawTree(parser_answer, 1);
+        parser.Program()->DrawTree(parser_answer, 1);
 
         if (parser_answer.str() == out_file_content) {
             std::cout << "OK\n";
         } else {
             is_success = false;
             std::cout << "FAILED\n";
-            std::cout << "\tOut file: \t" << out_file_content << "\n";
-            std::cout << "\tParser: \t\t" << parser_answer.str() << "\n";
+            std::cout << "Out file: \n" << out_file_content << "\n";
+            std::cout << "Parser: \n" << parser_answer.str() << "\n";
         }
     } catch (ParserException &err) {
         if (out_file_content == err.what()) {
-            std::cout << "OK\t" << err.what() << "\n";
+            std::cout << "OK\n";
         } else {
             is_success = false;
             std::cout << "FAILED\n";
-            std::cout << "\tOut file: \t" << out_file_content << "\n";
-            std::cout << "\tLexer: \t\t" << err.what() << "\n";
+            std::cout << "Out file: \n" << out_file_content << "\n";
+            std::cout << "Lexer: \n" << err.what() << "\n";
         }
     }
 
