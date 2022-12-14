@@ -309,7 +309,12 @@ Lexeme Lexer::ScanNumber(int system) {
                 cur_state = e;
                 c = Get();
                 lex += c;
-            } else { // here bug
+            } else if (c == '.') {
+                UnGet();
+                lex.pop_back();
+                cur_state = finish;
+                lexemeType = Integer;
+            } else {
                 cur_state = finish;
             }
         }
