@@ -42,6 +42,15 @@ public:
     void DrawTree(std::ostream &os, int depth) override;
 };
 
+class NodeString : public Node {
+    Lexeme lexeme;
+
+public:
+    explicit NodeString(Lexeme &lexeme) : Node(), lexeme(lexeme) {};
+
+    void DrawTree(std::ostream &os, int depth) override;
+};
+
 class NodeNumber : public Node {
     Lexeme lexeme;
 
