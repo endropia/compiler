@@ -1,1 +1,14 @@
-abc
+program : Unnamed program
+   var: 
+      a
+      type: Integer
+      1
+   var: 
+      b
+      type: Real
+   var: 
+      c
+      d
+      type: Char
+   stmts:
+      empty

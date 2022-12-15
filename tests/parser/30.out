@@ -1,0 +1,7 @@
+program : Unnamed program
+   stmts:
+      stmts:
+         stmts:
+            call
+               writeln
+                  1

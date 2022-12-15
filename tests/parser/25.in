@@ -1,0 +1,7 @@
+var
+a: record x, y: integer; end;
+begin
+    a.x := 2;
+    a.y := 0;
+    writeln(a.x, a.y);
+end.

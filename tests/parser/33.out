@@ -1,0 +1,25 @@
+program : Unnamed program
+   var: 
+      i
+      type: integer
+   stmts:
+      for
+         i
+         to
+            1
+            10
+               call
+                  writeln
+                     *
+      for
+         i
+         to
+            1
+            10
+               stmts:
+                  call
+                     writeln
+                        *
+                  call
+                     writeln
+                        *

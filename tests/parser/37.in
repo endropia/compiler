@@ -1,0 +1,5 @@
+var a: Integer = 1;
+
+begin
+if a > 1 a := 2;
+end.

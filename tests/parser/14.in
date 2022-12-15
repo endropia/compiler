@@ -1,0 +1,4 @@
+procedure (var b: Integer; const c: Real);
+begin
+    b := c;
+end;

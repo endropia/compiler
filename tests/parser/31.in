@@ -1,0 +1,6 @@
+begin
+begin
+begin
+writeln(1);
+end;
+end.

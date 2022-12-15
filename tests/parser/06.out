@@ -1,11 +1,18 @@
-+
-	/
-		+
-			a
-			10
-		+
-			*
-				3
-				2
-			10
-	1
+program : Unnamed program
+   const:
+      a
+      1
+   const:
+      b
+      type: Integer
+      2
+   const:
+      c
+      1
+   const:
+      d
+      +
+         3
+         7
+   stmts:
+      empty

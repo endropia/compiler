@@ -1,0 +1,23 @@
+program : Unnamed program
+   var: 
+      a
+      record
+      x
+         type: integer
+      y
+         type: integer
+   stmts:
+      :=
+         a
+            x
+         2
+      :=
+         a
+            y
+         0
+      call
+         writeln
+            a
+               x
+            a
+               y

@@ -1,0 +1,42 @@
+var
+a: Integer = 10;
+b: Integer = 10;
+
+begin
+    writeln(+1);
+    writeln(-1);
+    writeln(1 * a + 4);
+    writeln(-+-1);
+    writeln(2+++++3);
+    writeln(a + b);
+    writeln(2 - b);
+    writeln(2 * b);
+    writeln(2 / b);
+    writeln(a + b + b + b);
+    writeln(b * (a + b));
+    writeln(a / b * c / b);
+    writeln(a div b);
+    writeln(a mod b);
+    writeln(a + b div 2);
+    writeln(a + b mod 2);
+    writeln(a xor b);
+    writeln(a shr b);
+    writeln(a shl b);
+
+
+    writeln(1 <> 3);
+    writeln(1 < 3);
+    writeln(1 <= 3);
+    writeln(1 >= 3);
+    writeln(1 > 3);
+    writeln(1 = 3);
+    writeln(a or b);
+    writeln(2 or b or (4 or 5) or 6);
+    writeln(2 and (a or 4 and 5));
+
+    a := 1;
+    a += 1;
+    a -= 1;
+    a *= 1;
+    a /= 1;
+end.

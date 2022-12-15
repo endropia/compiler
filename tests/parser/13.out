@@ -1,0 +1,41 @@
+program : Unnamed program
+   procedure:
+      a
+      parameters: 
+         type: Integer
+         var
+         b
+         type: Integer
+         const
+         c
+      stmts:
+         :=
+            b
+            c
+   procedure:
+      a
+      parameters: 
+         type: Integer
+         var
+         a
+      stmts:
+         :=
+            a
+            +
+               2
+               3
+   procedure:
+      a
+      parameters: 
+      var: 
+         b
+         type: Integer
+      const:
+         a
+         1
+      stmts:
+         :=
+            b
+            a
+   stmts:
+      empty

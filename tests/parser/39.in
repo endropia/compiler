@@ -1,0 +1,12 @@
+var
+    sum: integer;
+
+begin
+    sum := 0;
+
+    while sum < 100 do begin
+        sum := sum + 3;
+    end;
+
+    writeln(sum);
+end.

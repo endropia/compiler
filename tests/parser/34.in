@@ -1,0 +1,6 @@
+var
+    i: integer;
+begin
+    for i := 1  10 do
+        writeln('*');
+end.

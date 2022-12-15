@@ -1,0 +1,9 @@
+program : Unnamed program
+   var: 
+      a
+      type: Integer
+      1
+   stmts:
+      call
+         writeln
+            a

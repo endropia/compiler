@@ -1,1 +1,9 @@
-(a + 10) / (3 * 2 + 10) + 1
+const
+a = 1;
+const
+b : Integer = 2;
+c = '1';
+d = 3 + 7;
+begin
+end.
+

@@ -1,1 +1,12 @@
-(1, 1) Factor expected
+program : Unnamed program
+   alias
+      type: Integer
+      a
+   alias
+      type: Char
+      b
+   alias
+      type: Real
+      c
+   stmts:
+      empty

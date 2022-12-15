@@ -1,0 +1,21 @@
+program : Unnamed program
+   var: 
+      sum
+      type: integer
+   stmts:
+      :=
+         sum
+         0
+      while
+         <
+            sum
+            100
+            stmts:
+               :=
+                  sum
+                  +
+                     sum
+                     3
+      call
+         writeln
+            sum

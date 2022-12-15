@@ -1,0 +1,19 @@
+program : Unnamed program
+   function:
+      a
+      type: integer
+      parameters: 
+         type: integer
+         b
+      var: 
+         c
+         type: integer
+      stmts:
+         :=
+            b
+            2
+         :=
+            c
+            b
+   stmts:
+      empty

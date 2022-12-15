@@ -1,0 +1,8 @@
+function a( var c: integer): Integer;
+begin
+a := 10 + c;
+end;
+
+begin
+    writeln(a(2));
+end.

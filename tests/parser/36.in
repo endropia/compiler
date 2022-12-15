@@ -1,0 +1,13 @@
+var a: Integer = 1;
+
+begin
+if a > 1 then a := 2;
+
+if (a = 1) and (2 > 1) then a := 3 + 7 else a := 8;
+
+if (a = 1) and (2 > 1) then a := 3 + 7 else
+ begin
+ a := 8;
+ writeln(a);
+ end;
+end.

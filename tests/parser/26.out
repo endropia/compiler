@@ -1,0 +1,20 @@
+program : Unnamed program
+   function:
+      a
+      type: Integer
+      parameters: 
+         type: integer
+         var
+         c
+      stmts:
+         :=
+            a
+            +
+               10
+               c
+   stmts:
+      call
+         writeln
+            call
+               a
+                  2

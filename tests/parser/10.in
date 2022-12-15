@@ -1,1 +1,7 @@
-+
+type
+a = Integer;
+type
+b = Char;
+c = Real;
+begin
+end.

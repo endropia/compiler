@@ -1,0 +1,11 @@
+program : Unnamed program
+   var: 
+      b
+      type: string
+   stmts:
+      :=
+         b
+         hello
+      call
+         writeln
+            b

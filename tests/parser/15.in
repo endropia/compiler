@@ -1,0 +1,1 @@
+procedure a(var b: Integer; const c: Real);

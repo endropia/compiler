@@ -1,1 +1,5 @@
-(10)+(a)
+const
+a = 1
+b:Integer = 3;
+begin
+end;

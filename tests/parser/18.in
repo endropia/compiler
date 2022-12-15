@@ -1,0 +1,8 @@
+function (b : integer): integer;
+var c: integer;
+begin
+   b := 2;
+   c := b;
+end;
+
+begin end.

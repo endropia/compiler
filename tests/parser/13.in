@@ -1,0 +1,18 @@
+procedure a(var b: Integer; const c: Integer);
+begin
+    b := c;
+end;
+
+procedure a(var a: Integer);
+begin
+    a := 2 + 3;
+end;
+
+procedure a();
+var b: Integer;
+const a = 1;
+begin
+    b := a;
+end;
+
+begin end.

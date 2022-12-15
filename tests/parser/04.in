@@ -1,1 +1,6 @@
-abc
+var
+a:Integer = 1;
+b:Real;
+c, d : Char;
+begin
+end.

@@ -1,1 +1,4 @@
-(a + 10) / 3 + 1
+var
+a, b : Integer = 10;
+begin
+end.
