@@ -41,3 +41,4 @@ compiler [args]
 
 - ``-l`` run lexer
 - ``-p`` run parser
+- ``-s`` run parser with semantic
