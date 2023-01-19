@@ -41,6 +41,7 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+    Position GetPos() override { return lexeme.GetPos(); }
 };
 
 class NodeUnaryOperation : public Node {
@@ -56,6 +57,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return op.GetPos(); }
 };
 
 class NodeString : public Node {
@@ -67,6 +70,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return lexeme.GetPos(); }
 };
 
 class NodeNumber : public Node {
@@ -78,6 +83,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return lexeme.GetPos(); }
 };
 
 class NodeBoolean : public Node {
@@ -89,6 +96,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return lexeme.GetPos(); }
 };
 
 class NodeVar : public Node {
@@ -100,6 +109,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return lexeme.GetPos(); }
 
 };
 
@@ -116,6 +127,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return field->GetPos(); }
 };
 
 class NodeCallAccess : public Node {
@@ -131,6 +144,8 @@ public:
 
     Node *callable;
     std::vector<Node *> params;
+
+    Position GetPos() override { return callable->GetPos(); }
 };
 
 class NodeArrayAccess : public Node {
@@ -146,6 +161,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return arr->GetPos(); }
 };
 
 
@@ -163,6 +180,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return type->GetPos(); }
 };
 
 class NodeRange : public Node {
@@ -178,6 +197,7 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
 };
 
 class NodeArrayType : public NodeType {
@@ -193,6 +213,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return type->GetPos(); }
 };
 
 class NodeField : public Node {
@@ -208,6 +230,8 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
+    Position GetPos() override { return type->GetPos(); }
 };
 
 class NodeRecordType : public NodeType {
@@ -457,6 +481,7 @@ public:
     void Accept(Visitor *visitor) override { visitor->Visit(this); }
 
     void DrawTree(std::ostream &os, int depth) override;
+
 };
 
 class NodeProcDecl : public NodeDecl {

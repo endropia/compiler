@@ -254,12 +254,17 @@ public:
     }
 
     template<class T>
-    SemanticException(T object_with_pos, const std::string &message)
+    SemanticException(T* object_with_pos, const std::string &message)
             : SemanticException(object_with_pos->GetPos(), message) {}
 
     explicit SemanticException(const std::string &message) : std::exception() {
         this->message = message;
     }
+
+    template<class T>
+    SemanticException(T object_with_pos, const std::string &message)
+            : SemanticException(object_with_pos.GetPos(), message) {}
+
 };
 
 const auto SYM_INTEGER = new SymbolInteger();

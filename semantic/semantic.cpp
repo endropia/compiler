@@ -1,5 +1,8 @@
+#include <sstream>
 #include "semantic.h"
 #include "../parser/parser.h"
+
+#include <magic_enum.hpp>
 
 
 SymbolType *Semantic::GetSymType(NodeType *type) {
@@ -30,7 +33,7 @@ SymbolType *Semantic::GetSymType(NodeType *type) {
     auto symbol = stack.get(name);
     auto symbol_type = dynamic_cast<SymbolType *>(symbol);
     if (symbol_type == nullptr) {
-        throw SemanticException("Type is not found");
+        throw SemanticException(type, "Type is not found");
     }
     return symbol_type;
 }
@@ -44,6 +47,10 @@ void Semantic::Visit(NodeBinaryOperation *node) {
     auto rst = node->right->symbol_type;
 
     if (node->lexeme.GetType() == LexemeType::Operator) {
+        std::stringstream stream;
+        stream << magic_enum::enum_name(node->lexeme.GetValue<Operators>())
+               << " operation is not overloaded for "
+               << lst->GetName() << " and " << rst->GetName();
         switch (node->lexeme.GetValue<Operators>()) {
             case Operators::EQUAL:
             case Operators::UNEQUAL:
@@ -58,7 +65,7 @@ void Semantic::Visit(NodeBinaryOperation *node) {
                         (lst->is(rst) && lst->is(SYM_CHAR)) ||
                         (lst->is(rst) && lst->is(SYM_STRING))
                 )) {
-                    throw SemanticException("It is not binary operation");
+                    throw SemanticException(node, stream.str());
                 }
                 node->symbol_type = SYM_BOOLEAN;
                 break;
@@ -68,7 +75,7 @@ void Semantic::Visit(NodeBinaryOperation *node) {
                         (lst->is(rst) && lst->is(SYM_DOUBLE)) ||
                         (lst->is(rst) && lst->is(SYM_STRING))
                 )) {
-                    throw SemanticException("It is not binary operation");
+                    throw SemanticException(node, stream.str());
                 }
                 node->symbol_type = lst;
                 break;
@@ -78,7 +85,7 @@ void Semantic::Visit(NodeBinaryOperation *node) {
                         (lst->is(rst) && lst->is(SYM_INTEGER)) ||
                         (lst->is(rst) && lst->is(SYM_DOUBLE))
                 )) {
-                    throw SemanticException("It is not binary operation");
+                    throw SemanticException(node, stream.str());
                 }
                 node->symbol_type = lst;
                 break;
@@ -87,11 +94,15 @@ void Semantic::Visit(NodeBinaryOperation *node) {
                         (lst->is(rst) && lst->is(SYM_INTEGER)) ||
                         (lst->is(rst) && lst->is(SYM_DOUBLE))
                 )) {
-                    throw SemanticException("It is not binary operation");
+                    throw SemanticException(node, stream.str());
                 }
                 node->symbol_type = SYM_DOUBLE;
         }
     } else {
+        std::stringstream stream;
+        stream << magic_enum::enum_name(node->lexeme.GetValue<AllKeywords>())
+               << " operation is not overloaded for "
+               << lst->GetName() << " and " << rst->GetName();
         switch (node->lexeme.GetValue<AllKeywords>()) {
             case AllKeywords::OR:
             case AllKeywords::XOR:
@@ -100,7 +111,7 @@ void Semantic::Visit(NodeBinaryOperation *node) {
                         (lst->is(rst) && lst->is(SYM_INTEGER)) ||
                         (lst->is(rst) && lst->is(SYM_BOOLEAN))
                 )) {
-                    throw SemanticException("It is not binary operation");
+                    throw SemanticException(node, stream.str());
                 }
                 node->symbol_type = SYM_BOOLEAN;
                 break;
@@ -111,7 +122,7 @@ void Semantic::Visit(NodeBinaryOperation *node) {
                 if (!(
                         (lst->is(rst) && lst->is(SYM_INTEGER))
                 )) {
-                    throw SemanticException("It is not binary operation");
+                    throw SemanticException(node, stream.str());
                 }
                 node->symbol_type = lst;
                 break;
@@ -134,7 +145,14 @@ void Semantic::Visit(NodeUnaryOperation *node) {
         if (sym_type->is(SYM_INTEGER)) node->symbol_type = SYM_INTEGER;
     }
     if (node->symbol_type == nullptr) {
-        throw SemanticException("Unary operator does not overloaded");
+
+        std::stringstream stream;
+        stream
+                << " Unary operator "
+                << ((node->op == LexemeType::Operator) ? magic_enum::enum_name(node->op.GetValue<Operators>())
+                                                       : magic_enum::enum_name(node->op.GetValue<AllKeywords>()))
+                << "is not overloaded for " << sym_type->GetName();
+        throw SemanticException(node, stream.str());
     }
 }
 
@@ -170,7 +188,7 @@ void Semantic::Visit(NodeVar *node) {
         node->symbol_type = id_proc_casted;
         return;
     }
-    throw SemanticException("It is not not var");
+    throw SemanticException(node, "It is not not var");
 }
 
 
@@ -178,7 +196,7 @@ void Semantic::Visit(NodeRecordAccess *node) {
     node->rec->Accept(this);
     auto sym_type_of_rec = dynamic_cast<SymbolRecord *>(node->rec->symbol_type->Resolve());
     if (sym_type_of_rec == nullptr) {
-        throw SemanticException("It is not record");
+        throw SemanticException(node->rec, "It is not record");
     }
     auto sym_field = sym_type_of_rec->fields->Get(
             dynamic_cast<NodeVar *>(node->field)->lexeme.GetValue<std::string>());
@@ -192,10 +210,10 @@ void Semantic::Visit(NodeCallAccess *node) {
     node->callable->Accept(this);
     auto sym_casted = dynamic_cast<SymbolProcedure *>(node->callable->symbol_type);
     if (sym_casted == nullptr) {
-        throw SemanticException("It is not callable");
+        throw SemanticException(node->callable, "It is not callable");
     }
     if (node->params.size() != sym_casted->GetCountOfArguments()) {
-        throw SemanticException("Do not match count of params");
+        throw SemanticException(node->callable, "Do not match count of params");
     }
     for (auto &param: node->params) {
         param->Accept(this);
@@ -205,7 +223,13 @@ void Semantic::Visit(NodeCallAccess *node) {
         auto sym_param = dynamic_cast<SymbolParam *>(sym_casted->locals->Get(name));
 
         if (node->params[i]->symbol_type->is(sym_param->type)) {
-            throw SemanticException("Types do not match if call access");
+            std::stringstream stream;
+            stream
+                    << "Expected "
+                    << sym_param->GetName()
+                    << "but "
+                    << node->params[i]->symbol_type->GetName();
+            throw SemanticException(node->params[i], stream.str());
         }
     }
 }
@@ -216,11 +240,11 @@ void Semantic::Visit(NodeArrayAccess *node) {
     node->arr->Accept(this);
     node->params->Accept(this);
     if (!node->params->symbol_type->is(SYM_INTEGER)) {
-        throw SemanticException("Integer expected");
+        throw SemanticException(node->arr, "Integer expected in parameter");
     }
     auto symbol_type_casted = dynamic_cast<SymbolArray *>(node->arr->symbol_type->Resolve());
     if (symbol_type_casted == nullptr) {
-        throw SemanticException("It is not array");
+        throw SemanticException(node->arr, "It is not array");
     }
     node->symbol_type = symbol_type_casted->type;
 }
@@ -234,10 +258,10 @@ void Semantic::Visit(NodeRange *node) {
     node->exp_first->Accept(this);
     node->exp_second->Accept(this);
     if (!node->exp_first->symbol_type->is(SYM_INTEGER)) {
-        throw SemanticException("Integer expected");
+        throw SemanticException(node->exp_first, "Integer expected");
     }
     if (!node->exp_second->symbol_type->is(SYM_INTEGER)) {
-        throw SemanticException("Integer expected");
+        throw SemanticException(node->exp_second, "Integer expected");
     }
 }
 
@@ -275,10 +299,14 @@ void Semantic::Visit(NodeAssignmentStatement *node) {
     node->left->Accept(this);
     node->right->Accept(this);
     if (!node->left->is_lvalue) {
-        throw SemanticException("It is not possible to assign rvalue");
+        throw SemanticException(node->left, "It is not possible to assign rvalue");
     }
     auto lst = node->left->symbol_type;
     auto rst = node->right->symbol_type;
+    std::stringstream stream;
+    stream << magic_enum::enum_name(node->lexeme.GetValue<Operators>())
+           << " assigment operation is not overloaded for "
+           << lst->GetName() << " and " << rst->GetName();
     switch (node->lexeme.GetValue<Operators>()) {
         case Operators::ASSIGN:
             if (!(
@@ -288,7 +316,7 @@ void Semantic::Visit(NodeAssignmentStatement *node) {
                     (lst->is(rst) && lst->is(SYM_CHAR)) ||
                     (lst->is(rst) && lst->is(SYM_STRING))
             )) {
-                throw SemanticException("Assigment statement does not overloaded");
+                throw SemanticException(node->lexeme, stream.str());
             }
             break;
         case Operators::ADDASSIGN:
@@ -297,7 +325,7 @@ void Semantic::Visit(NodeAssignmentStatement *node) {
                     (lst->is(rst) && lst->is(SYM_DOUBLE)) ||
                     (lst->is(rst) && lst->is(SYM_STRING))
             )) {
-                throw SemanticException("Assigment statement does not overloaded");
+                throw SemanticException(node->lexeme, stream.str());
             }
         case Operators::SUBSTRACTASSIGN:
         case Operators::MULTIPLYASSIGN:
@@ -306,7 +334,7 @@ void Semantic::Visit(NodeAssignmentStatement *node) {
                     (lst->is(rst) && lst->is(SYM_INTEGER)) ||
                     (lst->is(rst) && lst->is(SYM_DOUBLE))
             )) {
-                throw SemanticException("Assigment statement does not overloaded");
+                throw SemanticException(node->lexeme, stream.str());
             }
 
     }
@@ -318,10 +346,10 @@ void Semantic::Visit(NodeUserCallStatement *node) {
 
     auto sym_casted = dynamic_cast<SymbolProcedure *>(node->callable->symbol_type);
     if (sym_casted == nullptr) {
-        throw SemanticException("It is not callable");
+        throw SemanticException(node->callable, "It is not callable");
     }
     if (node->params.size() != sym_casted->GetCountOfArguments()) {
-        throw SemanticException("Count of params does not match");
+        throw SemanticException(node->callable, "Count of params does not match");
     }
     for (auto &param: node->params) {
         param->Accept(this);
@@ -331,7 +359,13 @@ void Semantic::Visit(NodeUserCallStatement *node) {
         auto name = sym_casted->locals->ordered[i + is_function];
         auto sym_param = dynamic_cast<SymbolParam *>(sym_casted->locals->Get(name));
         if (!node->params[i]->symbol_type->is(sym_param->type)) {
-            throw SemanticException("Types do not match in call access");
+            std::stringstream stream;
+            stream
+                    << "Expected "
+                    << sym_param->GetName()
+                    << "but "
+                    << node->params[i]->symbol_type->GetName();
+            throw SemanticException(node->params[i], stream.str());
         }
     }
 }
@@ -342,7 +376,7 @@ void Semantic::Visit(NodeIOCallStatement *node) {
         for (auto &param: node->params) {
             param->Accept(this);
             if (!param->is_lvalue) {
-                throw SemanticException("Rvalue can not be used in read procedure");
+                throw SemanticException(param, "Rvalue can not be used in read procedure");
             }
         }
     }
@@ -353,17 +387,16 @@ void Semantic::Visit(NodeIOCallStatement *node) {
              !param->symbol_type->is(SYM_BOOLEAN) &&
              !param->symbol_type->is(SYM_STRING) &&
              !param->symbol_type->is(SYM_CHAR))) {
-            throw SemanticException("It can not be used in io procedures");
+            throw SemanticException(param, "It can not be used in io procedures");
         }
     }
 }
 
 
-
 void Semantic::Visit(NodeIfStatement *node) {
     node->exp->Accept(this);
     if (!node->exp->symbol_type->is(SYM_BOOLEAN)) {
-        throw SemanticException("Boolean expected");
+        throw SemanticException(node->exp, "Boolean expected");
     }
     node->statement->Accept(this);
     if (node->else_statement != nullptr) {
@@ -375,7 +408,7 @@ void Semantic::Visit(NodeIfStatement *node) {
 void Semantic::Visit(NodeWhileStatement *node) {
     node->exp->Accept(this);
     if (!node->exp->symbol_type->is(SYM_BOOLEAN)) {
-        throw SemanticException("Boolean expected");
+        throw SemanticException(node->exp, "Boolean expected");
     }
     node->statement->Accept(this);
 }
@@ -386,13 +419,13 @@ void Semantic::Visit(NodeForStatement *node) {
     node->exp_begin->Accept(this);
     node->exp_end->Accept(this);
     if (!node->var->symbol_type->is(SYM_INTEGER)) {
-        throw SemanticException("Ordinary expected in for");
+        throw SemanticException(node->var, "Ordinary expected in for");
     }
     if (!node->exp_begin->symbol_type->is(SYM_INTEGER)) {
-        throw SemanticException("Integer expected");
+        throw SemanticException(node->exp_begin, "Integer expected");
     }
     if (!node->exp_end->symbol_type->is(SYM_INTEGER)) {
-        throw SemanticException("Integer expected");
+        throw SemanticException(node->exp_end, "Integer expected");
     }
     node->statement->Accept(this);
 }
@@ -427,8 +460,10 @@ void Semantic::Visit(NodeVarDecl *node) {
         auto sym_type = GetSymType(dynamic_cast<NodeType *>(node->type));
         if (node->exp != nullptr) {
             node->exp->Accept(this);
-            if (sym_type->is(node->exp->symbol_type)) {
-                throw SemanticException("Types do not match");
+            if (!sym_type->is(node->exp->symbol_type)) {
+                std::stringstream stream;
+                stream << "Expected " << sym_type->GetName() << ", but found " << node->exp->symbol_type->GetName();
+                throw SemanticException(node, stream.str());
             }
         }
         stack.Push(
@@ -442,8 +477,10 @@ void Semantic::Visit(NodeConstDecl *node) {
     node->exp->Accept(this);
     if (node->type != nullptr) {
         sym_type = GetSymType(dynamic_cast<NodeType *>(node->type));
-        if (sym_type->is(node->exp->symbol_type)) {
-            throw SemanticException("Types do not match");
+        if (!sym_type->is(node->exp->symbol_type)) {
+            std::stringstream stream;
+            stream << "Expected " << sym_type->GetName() << ", but found " << node->exp->symbol_type->GetName();
+            throw SemanticException(node, stream.str());
         }
     } else {
         sym_type = node->exp->symbol_type;

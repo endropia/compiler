@@ -212,7 +212,7 @@ bool SemanticTester::RunTest(const std::string &file) {
             is_success = false;
             std::cout << "FAILED\n";
             std::cout << "Out file: \n" << out_file_content << "\n";
-            std::cout << "Parser: \n" << parser_answer.str() << "\n";
+            std::cout << "Semantic: \n" << parser_answer.str() << "\n";
         }
     } catch (SemanticException &err) {
         if (out_file_content == err.what()) {
@@ -221,7 +221,7 @@ bool SemanticTester::RunTest(const std::string &file) {
             is_success = false;
             std::cout << "FAILED\n";
             std::cout << "Out file: \n" << out_file_content << "\n";
-            std::cout << "Parser: \n" << err.what() << "\n";
+            std::cout << "Semantic: \n" << err.what() << "\n";
         }
     }
 
