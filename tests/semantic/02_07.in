@@ -1,0 +1,8 @@
+var
+	a: integer;
+begin
+	a := 1;
+	if (a) then begin
+	a += 1;
+	end;
+end.

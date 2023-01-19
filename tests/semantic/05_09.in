@@ -1,0 +1,6 @@
+var
+	a: integer;
+	b: string;
+begin
+	writeln(a = b);
+end.

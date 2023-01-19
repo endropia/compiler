@@ -1,0 +1,22 @@
+program : Unnamed program
+   alias
+      record
+      x
+         type: integer
+      y
+         type: integer
+      point
+   var: 
+      a
+      type: point
+   stmts:
+      empty
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         point                         alias               
+1         a                             variable            

@@ -1,0 +1,5 @@
+type a = integer;
+type a = boolean;
+
+begin
+end.

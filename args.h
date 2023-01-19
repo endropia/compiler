@@ -3,6 +3,6 @@
 
 #include <string>
 
-bool check_arg(int argc, char **argv, const std::string &arg);
+bool CheckArg(int argc, char **argv, const std::string &arg);
 
 #endif //COMPILER_ARGS_H

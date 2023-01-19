@@ -1,0 +1,6 @@
+var
+	a: boolean;
+	b: string;
+begin
+	a += b;
+end.

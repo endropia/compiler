@@ -1,0 +1,7 @@
+var
+a, b: integer;
+c, d: double;
+begin
+	a += b;
+	c += d;
+end.

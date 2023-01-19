@@ -1,0 +1,50 @@
+program : Unnamed program
+   var: 
+      a
+      type: integer
+   stmts:
+      :=
+         a
+         1
+      if
+         >
+            a
+            4
+         +=
+            a
+            1
+      if
+         >
+            a
+            3
+         -=
+            a
+            1
+         else
+            -=
+               a
+               1
+      if
+         and
+            >
+               a
+               2
+            <
+               a
+               9
+         stmts:
+            +=
+               a
+               3
+            *=
+               a
+               2
+
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         a                             variable            

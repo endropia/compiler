@@ -9,8 +9,8 @@
 
 class Lexer {
     std::ifstream &file;
-    Position position = {1, 1};
-    Position begin_position = {1, 1};
+    Position position = {};
+    Position begin_position = {};
     int column_after_new_line = 1;
 
     char Get();
@@ -20,6 +20,7 @@ class Lexer {
     char Peek();
 
     static std::string ToUpper(std::string);
+    std::string ToLower(std::string s);
 
     void SaveBeginPosition();
 

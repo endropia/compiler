@@ -167,7 +167,7 @@ class Position {
     int column;
 
 public:
-    Position(int line, int column);
+    Position();
 
     [[nodiscard]] int GetLine() const;
 
@@ -200,6 +200,8 @@ public:
     Position GetPos() { return position; }
 
     std::string GetRaw() { return rawLexeme; }
+
+    void ConvertToId();
 
     friend bool operator==(Lexeme &lex, LexemeType type);
 

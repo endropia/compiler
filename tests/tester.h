@@ -50,4 +50,11 @@ public:
     bool RunTest(const std::string &file) override;
 };
 
+class SemanticTester : public Tester {
+public:
+    explicit SemanticTester(std::string path) : Tester(path) {}
+
+    bool RunTest(const std::string &file) override;
+};
+
 #endif //COMPILER_TESTER_H

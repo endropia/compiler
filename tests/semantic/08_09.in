@@ -1,0 +1,7 @@
+procedure p(a: integer; b: double);
+	begin
+	end;
+
+begin
+	p('aaaaaa', 10.1);
+end.

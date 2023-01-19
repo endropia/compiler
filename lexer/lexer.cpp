@@ -6,7 +6,7 @@
 #include <cmath>
 
 Lexer::Lexer(std::ifstream &file) : file(file) {
-    position = {1, 1};
+    position.Set(1, 1);
 }
 
 Lexer::~Lexer() {
@@ -428,7 +428,7 @@ Lexeme Lexer::ScanIdentifier() {
         return PrepareLexeme(LexemeType::Keyword, keyword.value(), lex);
     }
 
-    return PrepareLexeme(LexemeType::Identifier, lex, lex);
+    return PrepareLexeme(LexemeType::Identifier, ToLower(lex), lex);
 }
 
 void Lexer::ScanSingleLineComment() {
@@ -473,6 +473,13 @@ void Lexer::ScanMultilineComment() {
 std::string Lexer::ToUpper(std::string s) {
     for (char &i: s) {
         i = toupper(i);
+    }
+    return s;
+}
+
+std::string Lexer::ToLower(std::string s) {
+    for (char &i: s) {
+        i = tolower(i);
     }
     return s;
 }

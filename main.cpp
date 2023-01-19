@@ -3,6 +3,7 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "args.h"
+#include "semantic/semantic.h"
 
 
 int main(int argc, char **argv) {
@@ -14,6 +15,7 @@ int main(int argc, char **argv) {
 
     // -l - run lexer
     // -p - run parser
+    // -s - run semantic
 
     if (!reader.good()) {
         std::cout << "file doesnt exist";
@@ -22,7 +24,7 @@ int main(int argc, char **argv) {
 
     reader.close();
 
-    if (check_arg(argc, argv, "-l")) {
+    if (CheckArg(argc, argv, "-l")) {
         auto stream = std::ifstream(argv[1]);
         Lexer lexer(stream);
         while (true) {
@@ -39,16 +41,26 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (check_arg(argc, argv, "-p")) {
+    if (CheckArg(argc, argv, "-p")) {
         auto stream = std::ifstream(argv[1]);
         Lexer lexer(stream);
         Parser parser(lexer);
 
         auto head = parser.Program();
-//        for (auto i: head) {
-//            i->DrawTree(std::cout, 1);
-//        }
         head->DrawTree(std::cout, 1);
+    }
+
+    if (CheckArg(argc, argv, "-s")) {
+        auto stream = std::ifstream(argv[1]);
+        Lexer lexer(stream);
+        Parser parser(lexer);
+
+        auto head = parser.Program();
+        auto semantic_visitor = new Semantic();
+        head->Accept(semantic_visitor);
+        head->DrawTree(std::cout, 1);
+        std::cout << "\n";
+        semantic_visitor->GetStack().Draw(std::cout);
     }
 
     return 0;

@@ -1,0 +1,5 @@
+var
+	arr: array[0..10] of integer;
+begin
+	writeln(arr);
+end.

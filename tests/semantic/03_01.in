@@ -1,0 +1,6 @@
+type int = integer;
+type int_ = int;
+var
+ 	a: int;
+ 	b: int_;
+begin end.

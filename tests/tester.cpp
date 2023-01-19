@@ -4,6 +4,7 @@
 
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
+#include "../semantic/semantic.h"
 
 TestResult &TestResult::operator+=(const TestResult &res) {
     counter_all += res.counter_all;
@@ -155,6 +156,65 @@ bool ParserTester::RunTest(const std::string &file) {
             std::cout << "Parser: \n" << parser_answer.str() << "\n";
         }
     } catch (ParserException &err) {
+        if (out_file_content == err.what()) {
+            std::cout << "OK\n";
+        } else {
+            is_success = false;
+            std::cout << "FAILED\n";
+            std::cout << "Out file: \n" << out_file_content << "\n";
+            std::cout << "Parser: \n" << err.what() << "\n";
+        }
+    }
+
+    return is_success;
+}
+
+bool SemanticTester::RunTest(const std::string &file) {
+    auto stream = std::ifstream(file + ".in");
+    Lexer lexer(stream);
+    Parser parser(lexer);
+    Semantic *semantic_visitor = new Semantic();
+
+    std::ifstream file_out(file + ".out");
+
+    bool is_success = true;
+
+    if (!file_out.good()) {
+        std::ofstream file_out_new;
+        file_out_new.open(file + ".out");
+        try {
+            std::stringstream parser_answer;
+            auto program = parser.Program();
+            program->Accept(semantic_visitor);
+            program->DrawTree(parser_answer, 1);
+            parser_answer << "\n";
+            semantic_visitor->GetStack().Draw(parser_answer);
+            file_out_new << parser_answer.str();
+        } catch (SemanticException &err) {
+            file_out_new << err.what();
+        }
+        return is_success;
+    }
+    file_out.close();
+
+    auto out_file_content = ReadFile(file + ".out");
+    try {
+        std::stringstream parser_answer;
+        auto program = parser.Program();
+        program->Accept(semantic_visitor);
+        program->DrawTree(parser_answer, 1);
+        parser_answer << "\n";
+        semantic_visitor->GetStack().Draw(parser_answer);
+
+        if (parser_answer.str() == out_file_content) {
+            std::cout << "OK\n";
+        } else {
+            is_success = false;
+            std::cout << "FAILED\n";
+            std::cout << "Out file: \n" << out_file_content << "\n";
+            std::cout << "Parser: \n" << parser_answer.str() << "\n";
+        }
+    } catch (SemanticException &err) {
         if (out_file_content == err.what()) {
             std::cout << "OK\n";
         } else {

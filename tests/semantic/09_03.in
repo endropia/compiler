@@ -1,0 +1,6 @@
+var
+	a: array[0..10] of integer;
+
+begin
+	write(a[0.1]);
+end.

@@ -6,25 +6,25 @@
 // (A B) - group
 
 // program
-<program> ::= ["program" <id> ";"] {<declarations>} <compound_statement>
+<program> ::= ["program" <ids> ";"] {<declarations>} <compound_statement>
 
 // declarations
 <declarations> ::= <const_declaration> | <var_declaration> | <type_declaration> | <function_declaration> |
 										  <procedure_declaration>
 <const_declaration> ::= "const" <one_const_declaration> {<one_const_declaration>}
-<one_const_declaration> ::= <id> [":" <type>] "=" <exp> ";"
+<one_const_declaration> ::= <ids> [":" <type>] "=" <exp> ";"
 
 <var_declaration> ::= "var" <one_var_declaration> {<one_var_declaration>}
-<one_var_declaration> ::= <id> {"," <id>} ":" <type> ";" | <id> ":" <type> [ "=" <exp> ] ";"
+<one_var_declaration> ::= <ids> {"," <ids>} ":" <type> ";" | <ids> ":" <type> [ "=" <exp> ] ";"
 
 <type_declaration> ::= "type" <one_type_declaration> {<one_type_declaration>}
-<one_type_declaration> ::= <id> "=" <type> ";"
+<one_type_declaration> ::= <ids> "=" <type> ";"
 
 <function_declaration> ::= <function_header> {<const_declaration> | <var_declaration> | <type_declaration>} <compound_statement> ";"
-<function_header> ::= "function" <id> "(" <parameters> ")" ":" <type> ";"
+<function_header> ::= "function" <ids> "(" <parameters> ")" ":" <type> ";"
 
 <procedure_declaration> ::= <procedure_header> {<const_declaration> | <var_declaration> | <type_declaration>} <compound_statement> ";"
-<procedure_header> ::= "procedure" <id> "(" <parameters> ")" ";"
+<procedure_header> ::= "procedure" <ids> "(" <parameters> ")" ";"
 
 <parameters> ::= <parameter> {"," <parameter>}
 <parameter> ::= ["var" | "const"] <id_list> ":" <type>
@@ -35,13 +35,13 @@
 
 <simple_statement> ::= <assignment_statement> | <function_call_statement>
 <assignment_statement> ::= <var_ref> (":=" | "+=" | "-=" | "*=" | "/=") <expression>
-<function_call_statement> ::= <id> ["(" <expression_list> ")"]
+<function_call_statement> ::= <ids> ["(" <expression_list> ")"]
 <structured_statement> ::= <compound_statement> | <repetitive_statement> | <condition_statement>
 
 <compound_statement> ::= "begin" <statement_sequence> "end"
 <repetitive_statement> ::= <for_statement> | <while_statement>
 <while_statement> ::= "while" <expression> "do" <statement>
-<for_statement> ::= "for" <id> ":=" <expression> ("to" | "downto") <expression> "do" <statement>
+<for_statement> ::= "for" <ids> ":=" <expression> ("to" | "downto") <expression> "do" <statement>
 <condition_statement> ::= <if_statement>
 <if_statement> ::= "if" <expression> "then" <statement> ["else" <statement>]
 
@@ -51,14 +51,14 @@
 <term> ::= <simple_term> {("*" | "/" | "div" | "mod" | "and" | "shr" | "shl") <simple_term>}
 <simple_term> ::= {"+" | "-" | "not"} <factor>
 <factor> ::= "(" <expression> ")" | <string> | <number> | <var_ref>
-<var_ref> ::= <id> { <array_access> | <record_access> | <function_call> }
+<var_ref> ::= <ids> { <array_access> | <record_access> | <function_call> }
 <array_access> ::= "[" <expression_list> "]"
-<record_access> ::= "." <id>
+<record_access> ::= "." <ids>
 <function_call> ::= "(" [ <expression_list> ] ")"
 
 // types
 <type> ::=  <primitive_type> | <array_type> | <record_type>
-<primitive_type> ::= <id> | "string"
+<primitive_type> ::= <ids> | "string"
 <array_type> ::= "array" "[" <ranges> "]" "of" <type>
 <ranges> ::= <range> {"," <range>}
 <range> ::= <expression> ".." <expression>
@@ -68,4 +68,4 @@
 
 // utils
 <expression_list> ::= <expression> {"," <expression>}
-<id_list> ::= <id> {"," <id>}
+<id_list> ::= <ids> {"," <ids>}

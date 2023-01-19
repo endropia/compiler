@@ -1,0 +1,73 @@
+program : Unnamed program
+   var: 
+      i
+      type: integer
+   var: 
+      a
+      array
+      type: Integer
+      range
+         0
+         100
+   var: 
+      b
+      record
+      x
+         type: integer
+      y
+         type: integer
+   stmts:
+      for
+         i
+         to
+            0
+            10
+               stmts:
+                  empty      for
+         i
+         to
+            +
+               *
+                  3
+                  6
+               7
+            -
+               -
+                  3
+                  2
+               3
+               stmts:
+                  empty      for
+         array
+            a
+            0
+         to
+            0
+            10
+               stmts:
+                  empty      for
+         b
+            x
+         to
+            0
+            10
+               stmts:
+                  empty      while
+         <
+            i
+            10
+            stmts:
+               +=
+                  i
+                  1
+
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         i                             variable            
+1         a                             variable            
+1         b                             variable            

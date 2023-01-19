@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <magic_enum.hpp>
+#include "../symbol/symbol.h"
 
 void DrawIndent(std::ostream &os, int depth) {
     for (int i = 0; i < depth; ++i) {
@@ -174,8 +175,7 @@ Node *Parser::Expression() {
            lex == Operators::GREATER or
            lex == Operators::GREATEREQUAL or
            lex == Operators::LESS or
-           lex == Operators::LESSEQUAL or
-           lex == AllKeywords::IN) {
+           lex == Operators::LESSEQUAL) {
         lexeme = lexer.GetLexeme();
         left = new NodeBinaryOperation(lex, left, SimpleExpression());
         lex = lexeme;
@@ -232,6 +232,10 @@ Node *Parser::Factor() {
         lexeme = lexer.GetLexeme();
         return new NodeNumber(lex);
     }
+    if (lex == AllKeywords::TRUE or lex == AllKeywords::FALSE) {
+        lexeme = lexer.GetLexeme();
+        return new NodeBoolean(lex);
+    }
     if (lex == LexemeType::String) {
         lexeme = lexer.GetLexeme();
         return new NodeString(lex);
@@ -259,7 +263,9 @@ Node *Parser::Factor() {
                 if (lexeme != Separators::RSBRACKET) {
                     throw ParserException(lexeme.GetPos(), "']' expected");
                 }
-                res = new NodeArrayAccess(res, params);
+                for (auto &param: params) {
+                    res = new NodeArrayAccess(res, param);
+                }
             } else {
                 break;
             }
@@ -342,7 +348,8 @@ Node *Parser::Type() {
     if (lexeme == AllKeywords::STRING) {
         auto keyword = lexeme;
         lexeme = lexer.GetLexeme();
-        return new NodeSimpleType(new NodeKeyword(keyword));
+        keyword.ConvertToId();
+        return new NodeSimpleType(new NodeVar(keyword));
     }
     if (lexeme == AllKeywords::ARRAY) {
         return ArrayType();
@@ -401,9 +408,25 @@ Node *Parser::RecordType() {
 }
 
 NodeStatement *Parser::SimpleStatement() {
+    auto lex = lexeme;
+    if (lex == AllKeywords::WRITE || lex == AllKeywords::READ ||
+        (lex == LexemeType::Identifier && lex.GetValue<std::string>() == "writeln")) {
+        lexeme = lexer.GetLexeme();
+        if (lexeme != Separators::LPARENTHESIS) {
+            throw ParserException(lexeme.GetPos(), "( expected");
+        }
+        lexeme = lexer.GetLexeme();
+        auto params = ListExpressions(false);
+        if (lexeme != Separators::RPARENTHESIS) {
+            throw ParserException(lexeme.GetPos(), "')' expected");
+        }
+        lexeme = lexer.GetLexeme();
+        lex.ConvertToId();
+        return new NodeIOCallStatement(new NodeVar(lex), params);
+    }
     auto exp1 = Expression();
     if (dynamic_cast<NodeCallAccess *>(exp1) != nullptr) {
-        return new NodeCallStatement(dynamic_cast<NodeCallAccess *>(exp1));
+        return new NodeUserCallStatement(dynamic_cast<NodeCallAccess *>(exp1));
     }
     if (lexeme != Operators::ASSIGN and
         lexeme != Operators::ADDASSIGN and
@@ -448,9 +471,11 @@ NodeStatement *Parser::Statement() {
         return IfStatement();
     }
     if (lexeme == AllKeywords::FOR) {
+        lexeme = lexer.GetLexeme();
         return ForStatement();
     }
     if (lexeme == AllKeywords::WHILE) {
+        lexeme = lexer.GetLexeme();
         return WhileStatement();
     }
     return SimpleStatement();
@@ -472,7 +497,6 @@ NodeStatement *Parser::IfStatement() {
 }
 
 NodeStatement *Parser::WhileStatement() {
-    lexeme = lexer.GetLexeme();
     auto exp = Expression();
     if (lexeme != AllKeywords::DO) {
         throw ParserException(lexeme.GetPos(), "'do' expected");
@@ -484,12 +508,7 @@ NodeStatement *Parser::WhileStatement() {
 }
 
 NodeStatement *Parser::ForStatement() {
-    lexeme = lexer.GetLexeme();
-    if (lexeme != Identifier) {
-        throw ParserException(lexeme.GetPos(), "Identifier expected");
-    }
-    auto var = new NodeVar(lexeme);
-    lexeme = lexer.GetLexeme();
+    auto var = Factor();
     if (lexeme != Operators::ASSIGN) {
         throw ParserException(lexeme.GetPos(), "Assign expected");
     }
@@ -653,7 +672,7 @@ void NodeRecordAccess::DrawTree(std::ostream &os, int depth) {
 void NodeCallAccess::DrawTree(std::ostream &os, int depth) {
     os << "call" << "\n";
     DrawIndent(os, depth + 1);
-    rec->DrawTree(os, depth + 1);
+    callable->DrawTree(os, depth + 1);
     for (int i = 0; i < params.size(); i++) {
         DrawIndent(os, depth + 2);
         params[i]->DrawTree(os, depth + 2);
@@ -663,11 +682,9 @@ void NodeCallAccess::DrawTree(std::ostream &os, int depth) {
 void NodeArrayAccess::DrawTree(std::ostream &os, int depth) {
     os << "array" << "\n";
     DrawIndent(os, depth + 1);
-    rec->DrawTree(os, depth + 1);
-    for (int i = 0; i < params.size(); i++) {
-        DrawIndent(os, depth + 1);
-        params[i]->DrawTree(os, depth + 1);
-    }
+    arr->DrawTree(os, depth + 1);
+    DrawIndent(os, depth + 1);
+    params->DrawTree(os, depth + 1);
 }
 
 void NodeSimpleType::DrawTree(std::ostream &os, int depth) {
@@ -695,7 +712,7 @@ void NodeArrayType::DrawTree(std::ostream &os, int depth) {
 }
 
 void NodeField::DrawTree(std::ostream &os, int depth) {
-    for (auto &i: id) {
+    for (auto &i: ids) {
         DrawIndent(os, depth);
         i->DrawTree(os, depth);
         DrawIndent(os, depth + 1);
@@ -705,7 +722,7 @@ void NodeField::DrawTree(std::ostream &os, int depth) {
 
 void NodeRecordType::DrawTree(std::ostream &os, int depth) {
     os << "record\n";
-    for (auto &i: field) {
+    for (auto &i: fields) {
         i->DrawTree(os, depth);
     }
 }
@@ -803,7 +820,7 @@ void NodeVarDecl::DrawTree(std::ostream &os, int depth) {
 void NodeConstDecl::DrawTree(std::ostream &os, int depth) {
     os << "const:\n";
     DrawIndent(os, depth + 1);
-    vars->DrawTree(os, depth + 1);
+    var->DrawTree(os, depth + 1);
     if (type) {
         DrawIndent(os, depth + 1);
         type->DrawTree(os, depth + 1);
@@ -854,3 +871,15 @@ void NodeFuncDecl::DrawTree(std::ostream &os, int depth) {
 
 }
 
+void NodeBoolean::DrawTree(std::ostream &os, int depth) {
+    os << lexeme.GetRaw() << "\n";
+}
+
+std::string NodeIOCallStatement::GetName() {
+    auto callable_casted = dynamic_cast<NodeVar *>(callable);
+    return callable_casted->lexeme.GetValue<std::string>();
+}
+
+bool NodeIOCallStatement::IsRead() {
+    return GetName() == "read";
+}

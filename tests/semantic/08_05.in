@@ -1,0 +1,8 @@
+function second(a: integer; b: double; c: boolean; d: string): integer;
+	begin
+		result := 10;
+	end;
+
+begin
+	second(10, 10, 2.3, true, 'aaaaaa');
+end.

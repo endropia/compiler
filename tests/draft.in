@@ -1,0 +1,16 @@
+var a: integer;
+
+procedure proc(c: integer);
+var b: integer;
+begin
+
+end;
+
+function func(x: integer): integer;
+var y: integer;
+begin
+
+end;
+
+begin
+end.

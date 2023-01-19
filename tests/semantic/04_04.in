@@ -1,0 +1,5 @@
+var
+	a: string;
+begin
+	writeln(+a);
+end.

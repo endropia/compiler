@@ -1,0 +1,13 @@
+procedure first(a: integer; b: double; c: boolean; d: string);
+	begin
+	end;
+
+function second(a: integer; b: double; c: boolean; d: string): integer;
+	begin
+		result := 10;
+	end;
+
+begin
+	first(10, 2.3, true, 'aaaaaa');
+	second(10, 2.3, true, 'aaaaaa');
+end.

@@ -3,7 +3,7 @@
 
 #include <magic_enum.hpp>
 
-Position::Position(int line, int column) {
+Position::Position() {
     this->line = line;
     this->column = column;
 }
@@ -88,4 +88,15 @@ bool operator==(Lexeme &lex, Separators sep) {
 bool operator==(Lexeme &lex, AllKeywords keyword) {
     if (lex.type != LexemeType::Keyword) return false;
     return lex.GetValue<AllKeywords>() == keyword;
+}
+
+void Lexeme::ConvertToId() {
+    if (*this == LexemeType::Keyword) {
+        auto _value = std::string(magic_enum::enum_name(this->GetValue<AllKeywords>()));
+        for (auto &item: _value) {
+            item = (char) tolower(item);
+        }
+        this->value = _value;
+    }
+    type = LexemeType::Identifier;
 }

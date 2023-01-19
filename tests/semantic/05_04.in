@@ -1,0 +1,10 @@
+var
+	a, b: char;
+begin
+	writeln(a = b);
+	writeln(a > b);
+	writeln(a < b);
+	writeln(a >= b);
+	writeln(a <= b);
+	writeln(a <> b);
+end.

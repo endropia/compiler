@@ -1,0 +1,6 @@
+var
+	a: integer;
+
+begin
+	writeln(a.b);
+end.

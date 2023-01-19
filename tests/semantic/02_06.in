@@ -1,0 +1,8 @@
+var
+	i: char;
+begin
+	i := 'a';
+	while (i > 2) do begin
+	i += 1;
+	end;
+end.

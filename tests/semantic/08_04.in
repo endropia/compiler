@@ -1,0 +1,6 @@
+procedure first(a: integer; b: double; c: boolean; d: string);
+	begin
+	end;
+begin
+	first(10, 10, 2.3, true, 'aaaaaa');
+end.

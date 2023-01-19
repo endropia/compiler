@@ -1,0 +1,44 @@
+program : Unnamed program
+   alias
+      array
+      type: integer
+      range
+         0
+         10
+      arr
+   alias
+      array
+      array
+         type: integer
+         range
+            0
+            10
+      range
+         0
+         10
+      arr_of_arr
+   alias
+      array
+      type: integer
+      range
+         0
+         10
+      range
+         0
+         10
+      range
+         0
+         10
+      arr_
+   stmts:
+      empty
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         arr                           alias               
+1         arr_of_arr                    alias               
+1         arr_                          alias               

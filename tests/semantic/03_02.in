@@ -1,0 +1,4 @@
+type arr = array[0..10] of integer;
+type arr_of_arr = array[0..10] of array [0..10] of integer;
+type arr_ = array[0..10, 0..10, 0.. 10] of integer;
+begin end.

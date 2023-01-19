@@ -1,0 +1,11 @@
+var
+	a: integer;
+	b: boolean;
+begin
+	writeln(a = b);
+	writeln(a > b);
+	writeln(a < b);
+	writeln(a >= b);
+	writeln(a <= b);
+	writeln(a <> b);
+end.

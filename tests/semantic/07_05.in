@@ -1,0 +1,10 @@
+function first(): integer;
+	begin
+	end;
+
+function first(): integer;
+	begin
+	end;
+
+begin
+end.

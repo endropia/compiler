@@ -1,0 +1,12 @@
+var
+	a: integer;
+begin
+	a := 1;
+	if ( a > 4 ) then a += 1;
+	if ( a > 3 ) then a -= 1 else a+=2;
+	if ( a > 2 ) and ( a < 9 ) then
+		begin
+			 a += 3;
+			 a *= 2;
+		end;
+end.

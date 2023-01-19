@@ -1,0 +1,28 @@
+program : Unnamed program
+   var: 
+      a
+      b
+      type: integer
+   var: 
+      c
+      d
+      type: double
+   stmts:
+      +=
+         a
+         b
+      +=
+         c
+         d
+
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         a                             variable            
+1         b                             variable            
+1         c                             variable            
+1         d                             variable            

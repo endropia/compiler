@@ -1,0 +1,6 @@
+type
+	point = record
+		x: integer;
+		x: integer;
+	end;
+begin end.

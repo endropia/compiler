@@ -1,0 +1,66 @@
+program : Unnamed program
+   alias
+      record
+      x
+         type: integer
+      y
+         type: integer
+      point
+   var: 
+      a
+      type: integer
+   var: 
+      b
+      type: double
+   var: 
+      c
+      type: string
+   var: 
+      d
+      type: boolean
+   var: 
+      p
+      type: point
+   var: 
+      arr
+      array
+      type: integer
+      range
+         1
+         10
+   stmts:
+      call
+         read
+            a
+            b
+            c
+            d
+            array
+               arr
+               1
+      call
+         writeln
+            a
+            b
+            c
+            d
+            array
+               arr
+               1
+            p
+               x
+
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         point                         alias               
+1         a                             variable            
+1         b                             variable            
+1         c                             variable            
+1         d                             variable            
+1         p                             variable            
+1         arr                           variable            

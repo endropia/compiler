@@ -1,0 +1,14 @@
+var
+	a: record
+		b: integer;
+		c: double;
+		b: char;
+		e: string;
+		f: record
+			g: integer;
+			end;
+		end;
+
+begin
+	writeln(a.b, a.c, a.d, a.e, a.f.g);
+end.

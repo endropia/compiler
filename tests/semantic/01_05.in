@@ -1,0 +1,6 @@
+var
+	a: char;
+	b: string;
+begin
+	a += b;
+end.

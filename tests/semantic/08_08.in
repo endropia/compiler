@@ -1,0 +1,6 @@
+procedure p(var a: integer);
+	begin
+	end;
+begin
+	p(10);
+end.

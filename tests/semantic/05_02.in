@@ -1,0 +1,10 @@
+var
+	a, b: double;
+begin
+	writeln(a = b);
+	writeln(a > b);
+	writeln(a < b);
+	writeln(a >= b);
+	writeln(a <= b);
+	writeln(a <> b);
+end.

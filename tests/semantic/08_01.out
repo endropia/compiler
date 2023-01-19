@@ -1,0 +1,61 @@
+program : Unnamed program
+   procedure:
+      first
+      parameters: 
+         type: integer
+         a
+         type: double
+         b
+         type: boolean
+         c
+         type: string
+         d
+      stmts:
+         empty   function:
+      second
+      type: integer
+      parameters: 
+         type: integer
+         a
+         type: double
+         b
+         type: boolean
+         c
+         type: string
+         d
+      stmts:
+         :=
+            result
+            10
+   stmts:
+      call
+         first
+            10
+            2.3
+            true
+            aaaaaa
+      call
+         second
+            10
+            2.3
+            true
+            aaaaaa
+
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         first                         procedure           
+2         a                             param               
+2         b                             param               
+2         c                             param               
+2         d                             param               
+1         second                        function            
+2         result                        variable            
+2         a                             param               
+2         b                             param               
+2         c                             param               
+2         d                             param               

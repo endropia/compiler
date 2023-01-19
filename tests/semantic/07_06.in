@@ -1,0 +1,5 @@
+function b(a: integer; a: integer): integer;
+	begin
+	end;
+
+begin end.

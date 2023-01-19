@@ -1,0 +1,6 @@
+var
+	a: integer;
+
+begin
+	write(a[1]);
+end.

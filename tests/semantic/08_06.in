@@ -1,0 +1,18 @@
+type
+	point = record
+		x: integer;
+		y: integer;
+	end;
+
+var
+	a: integer;
+	b: double;
+	c: string;
+	d: boolean;
+	p: point;
+	arr: array [1..10] of integer;
+
+begin
+	read(a, b, c, d, arr[1]);
+	writeln(a, b, c, d, arr[1], p.x);
+end.

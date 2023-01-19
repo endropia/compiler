@@ -1,0 +1,46 @@
+program : Unnamed program
+   var: 
+      a
+      b
+      type: string
+   stmts:
+      call
+         writeln
+            =
+               a
+               b
+      call
+         writeln
+            >
+               a
+               b
+      call
+         writeln
+            <
+               a
+               b
+      call
+         writeln
+            >=
+               a
+               b
+      call
+         writeln
+            <=
+               a
+               b
+      call
+         writeln
+            <>
+               a
+               b
+
+scope     name                          class               
+------------------------------------------------------------
+0         integer                       primitive type      
+0         double                        primitive type      
+0         boolean                       primitive type      
+0         char                          primitive type      
+0         string                        primitive type      
+1         a                             variable            
+1         b                             variable            

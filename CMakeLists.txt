@@ -11,8 +11,8 @@ CPMAddPackage(
         GIT_TAG v0.8.1
 )
 
-add_executable(compiler main.cpp lexer/lexer.cpp lexer/lexeme.cpp parser/parser.cpp parser/parser.h args.cpp args.h)
-add_executable(compiler_tests tests/test.cpp lexer/lexer.cpp lexer/lexeme.cpp parser/parser.cpp parser/parser.h tests/tester.cpp tests/tester.h args.cpp args.h)
+add_executable(compiler main.cpp lexer/lexer.cpp lexer/lexeme.cpp parser/parser.cpp parser/parser.h args.cpp args.h symbol/symbol.cpp symbol/symbol.h semantic/semantic.cpp semantic/semantic.h)
+add_executable(compiler_tests tests/test.cpp lexer/lexer.cpp lexer/lexeme.cpp parser/parser.cpp parser/parser.h tests/tester.cpp tests/tester.h args.cpp args.h symbol/symbol.cpp symbol/symbol.h semantic/semantic.cpp semantic/semantic.h)
 
 target_link_libraries(compiler magic_enum::magic_enum)
 target_link_libraries(compiler_tests magic_enum::magic_enum)

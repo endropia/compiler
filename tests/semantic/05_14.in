@@ -1,0 +1,6 @@
+var
+	a: boolean;
+	b: char;
+begin
+	writeln(a = b);
+end.

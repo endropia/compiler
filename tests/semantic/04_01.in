@@ -1,0 +1,14 @@
+var
+	a: integer;
+	b: double;
+	c: boolean;
+begin
+	writeln(+a);
+	writeln(+b);
+
+	writeln(-a);
+	writeln(-b);
+
+	writeln(not a);
+	writeln(not c);
+end.
